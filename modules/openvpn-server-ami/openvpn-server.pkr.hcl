@@ -196,7 +196,7 @@ build {
 
   provisioner "file" {
     destination = "/tmp/terraform-aws-vault/modules"
-    source      = "${local.template_dir}/../terraform-aws-vault/modules/"
+    source      = "${local.template_dir}/../../terraform-aws-vault/modules/"
   }
 
   provisioner "file" {
@@ -292,7 +292,7 @@ build {
 
   provisioner "file" {
     destination = "/tmp/terraform-aws-vault/modules"
-    source      = "${local.template_dir}/../terraform-aws-vault/modules/"
+    source      = "${local.template_dir}/../../terraform-aws-vault/modules/"
   }
 
   provisioner "file" {
