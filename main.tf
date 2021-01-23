@@ -31,7 +31,7 @@ data "aws_vpc" "primary" {
   tags    = local.common_tags
 }
 data "aws_internet_gateway" "gw" {
-  default = false
+  # default = false
   tags    = local.common_tags
 }
 

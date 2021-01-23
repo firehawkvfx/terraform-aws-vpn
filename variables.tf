@@ -20,3 +20,7 @@ variable "openvpn_server_ami" {
   description = "The AMI ID of your PpenVPN Access Server image built with packer"
   type = string
 }
+
+variable "resourcetier" {
+  description = "The default resource tier - dev/green/blue/main"
+}
