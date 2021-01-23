@@ -113,6 +113,8 @@ locals {
 module "vpn" {
   create_vpn = true
 
+  ami = var.openvpn_server_ami
+
   source = "./modules/tf_aws_openvpn"
 
   route_public_domain_name = var.route_public_domain_name
