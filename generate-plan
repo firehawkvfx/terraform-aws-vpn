@@ -34,4 +34,4 @@ terraform init \
     -backend-config="key=main/terraform-aws-vpn/terraform.tfstate" \
     -backend-config="region=$AWS_DEFAULT_REGION" \
     -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
-terraform plan -out=tfplan -input=false -var "sleep=true"
+terraform plan -out=tfplan -input=false
