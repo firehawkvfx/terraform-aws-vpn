@@ -118,60 +118,60 @@ output "public_route_table_ids" {
   value = local.public_route_table_ids
 }
 
-# module "vpn" {
-#   create_vpn = true
+module "vpn" {
+  create_vpn = true
 
-#   ami = var.openvpn_server_ami
+  ami = var.openvpn_server_ami
 
-#   source = "./modules/tf_aws_openvpn"
+  source = "./modules/tf_aws_openvpn"
 
-#   route_public_domain_name = var.route_public_domain_name
+  route_public_domain_name = var.route_public_domain_name
 
-#   igw_id = local.aws_internet_gateway
+  igw_id = local.aws_internet_gateway
 
-#   public_subnets  = local.public_subnet_cidr_blocks
-#   private_subnets = local.private_subnet_cidr_blocks
+  public_subnets  = local.public_subnet_cidr_blocks
+  private_subnets = local.private_subnet_cidr_blocks
 
-#   name = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
+  name = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
-#   private_domain_name = local.private_domain
+  private_domain_name = local.private_domain
 
-#   # VPC Inputs
-#   vpc_id             = local.vpc_id
-#   vpc_cidr           = local.vpc_cidr
-#   vpn_cidr           = local.vpn_cidr
-#   public_subnet_ids  = local.public_subnets
-#   remote_vpn_ip_cidr = "${local.remote_public_ip}/32"
-#   remote_subnet_cidr = local.remote_subnet_cidr
+  # VPC Inputs
+  vpc_id             = local.vpc_id
+  vpc_cidr           = local.vpc_cidr
+  vpn_cidr           = local.vpn_cidr
+  public_subnet_ids  = local.public_subnets
+  remote_vpn_ip_cidr = "${local.remote_public_ip}/32"
+  remote_subnet_cidr = local.remote_subnet_cidr
 
-#   private_route_table_ids = local.private_route_table_ids
-#   public_route_table_ids  = local.public_route_table_ids
+  private_route_table_ids = local.private_route_table_ids
+  public_route_table_ids  = local.public_route_table_ids
 
-#   # EC2 Inputs
-#   aws_key_name = "main-deployment"
-#   # private_key          = local.private_key
-#   # aws_private_key_path = var.aws_private_key_path
-#   instance_type = var.instance_type
+  # EC2 Inputs
+  aws_key_name = "main-deployment"
+  # private_key          = local.private_key
+  # aws_private_key_path = var.aws_private_key_path
+  instance_type = var.instance_type
 
-#   # Network Routing Inputs.  source destination checks are disable for nat gateways or routing on an instance.
-#   source_dest_check = false
+  # Network Routing Inputs.  source destination checks are disable for nat gateways or routing on an instance.
+  source_dest_check = false
 
-#   # DNS Inputs
-#   public_domain_name = local.public_domain_name
-#   route_zone_id      = local.route_zone_id
+  # DNS Inputs
+  public_domain_name = local.public_domain_name
+  route_zone_id      = local.route_zone_id
 
-#   # # OpenVPN Inputs
-#   openvpn_user       = "openvpnas"
-#   openvpn_user_pw    = local.openvpn_user_pw
-#   openvpn_admin_user = "openvpnas"
-#   openvpn_admin_pw   = local.openvpn_admin_pw
+  # # OpenVPN Inputs
+  openvpn_user       = "openvpnas"
+  openvpn_user_pw    = local.openvpn_user_pw
+  openvpn_admin_user = "openvpnas"
+  openvpn_admin_pw   = local.openvpn_admin_pw
 
-#   # bastion_ip               = module.bastion.public_ip # the vpn is provisioned by the bastion entry point
-#   # bastion_dependency       = module.bastion.bastion_dependency
-#   # firehawk_init_dependency = var.firehawk_init_dependency
+  # bastion_ip               = module.bastion.public_ip # the vpn is provisioned by the bastion entry point
+  # bastion_dependency       = module.bastion.bastion_dependency
+  # firehawk_init_dependency = var.firehawk_init_dependency
 
-#   #sleep will stop instances to save cost during idle time.
-#   sleep = var.sleep
+  #sleep will stop instances to save cost during idle time.
+  sleep = var.sleep
 
-#   common_tags = local.common_tags
-# }
+  common_tags = local.common_tags
+}
