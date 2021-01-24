@@ -142,7 +142,7 @@ module "vpn" {
   vpn_cidr           = local.vpn_cidr
   public_subnet_ids  = local.public_subnets
   remote_vpn_ip_cidr = "${local.remote_public_ip}/32"
-  remote_ssh_ip_cidr = "${var.remote_ip_cidr}" # This may be the same as above, but can be different if using cloud 9 for deployment
+  remote_ssh_ip_cidr = var.remote_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
   remote_subnet_cidr = local.remote_subnet_cidr
 
   private_route_table_ids = local.private_route_table_ids
