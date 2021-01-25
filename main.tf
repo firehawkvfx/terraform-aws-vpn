@@ -121,6 +121,8 @@ output "public_route_table_ids" {
 module "vpn" {
   create_vpn = true
 
+  example_role_name = "VPNServerRole"
+
   ami = var.openvpn_server_ami
 
   source = "./modules/tf_aws_openvpn"
