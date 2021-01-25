@@ -138,6 +138,8 @@ module "vpn" {
 
   private_domain_name = local.private_domain
 
+  resourcetier = var.resourcetier
+
   # VPC Inputs
   vpc_id             = local.vpc_id
   vpc_cidr           = local.vpc_cidr
