@@ -121,7 +121,7 @@ output "public_route_table_ids" {
 module "vpn" {
   create_vpn = true
 
-  example_role_name = "VPNServerRole"
+  example_role_name = "vpn-server-vault-role"
 
   ami = var.openvpn_server_ami
 
