@@ -118,6 +118,10 @@ output "public_route_table_ids" {
   value = local.public_route_table_ids
 }
 
+output "vault_token" {
+  value = module.vpn.vault_token
+}
+
 module "vpn" {
   create_vpn = true
 
