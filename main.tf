@@ -118,10 +118,6 @@ output "public_route_table_ids" {
   value = local.public_route_table_ids
 }
 
-output "vault_token" {
-  value = module.vpn.vault_token
-}
-
 output "private_ip" {
   value = module.vpn.private_ip
 }
