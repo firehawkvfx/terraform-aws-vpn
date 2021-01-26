@@ -122,6 +122,14 @@ output "vault_token" {
   value = module.vpn.vault_token
 }
 
+output "private_ip" {
+  value = module.vpn.private_ip
+}
+
+output "public_ip" {
+  value = module.vpn.public_ip
+}
+
 module "vpn" {
   create_vpn = true
 
