@@ -121,7 +121,8 @@ output "public_route_table_ids" {
 module "vpn" {
   create_vpn = true
 
-  example_role_name = "vpn-server-vault-role"
+  # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
+  example_role_name = "vpn-server-vault-iam-creds-role" # this authenticates with a dynamically generated secret key
 
   ami = var.openvpn_server_ami
 
