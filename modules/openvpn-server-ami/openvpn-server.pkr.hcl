@@ -86,7 +86,6 @@ source "amazon-ebs" "openvpn-server-ami" {
   ami_name             = "firehawk-openvpn-server-${local.timestamp}-{{uuid}}"
   instance_type        = "t2.micro"
   region               = "${var.aws_region}"
-  iam_instance_profile = "provisioner_instance_role_pipeid0"
   source_ami           = "${var.openvpn_server_base_ami}"
   user_data            = <<EOF
 #! /bin/bash
@@ -94,9 +93,11 @@ admin_user=openvpnas
 admin_pw=''
 EOF
   ssh_username         = "openvpnas"
+  
   vpc_id               = "${var.vpc_id}"
   subnet_id            = "${var.subnet_id}"
   security_group_id    = "${var.security_group_id}"
+  iam_instance_profile = "provisioner_instance_role_pipeid0"
 }
 
 # source "amazon-ebs" "openvpn-server-ami" { # Open vpn server requires vault and consul, so we build it here as well.
