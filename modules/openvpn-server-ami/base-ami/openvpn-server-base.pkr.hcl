@@ -51,7 +51,7 @@ locals {
   template_dir = path.root
 }
 
-source "amazon-ebs" "openvpn-server-base-ami" { # Open vpn server requires vault and consul, so we build it here as well.
+source "amazon-ebs" "openvpn-server-base-ami" {
   ami_description = "An Open VPN Access Server AMI configured for Firehawk"
   ami_name        = "firehawk-openvpn-server-base-${local.timestamp}-{{uuid}}"
   instance_type   = "t2.micro"

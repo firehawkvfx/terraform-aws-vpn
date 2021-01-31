@@ -142,52 +142,6 @@ build {
     inline_shebang   = "/bin/bash -e"
   }
 
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline         = [
-  #     "export SHOWCOMMANDS=true; set -x",
-  #     # "lsb_release -a",
-  #     # "ps aux | grep [a]pt",
-  #     "sudo cat /etc/systemd/system.conf",
-  #     "sudo chown openvpnas:openvpnas /home/openvpnas; echo \"exit $?\"",
-  #     "echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections; echo \"exit $?\"",
-  #     "ls -ltriah /var/cache/debconf/passwords.dat; echo \"exit $?\"",
-  #     "ls -ltriah /var/cache/; echo \"exit $?\""
-  #   ]
-  # }
-
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   valid_exit_codes = [0,1] # ignore exit code.  this requirement is a bug in the open vpn ami.
-  #   inline         = [
-  #     # "sudo apt -y install dialog || exit 0" # supressing exit code.
-  #     "sudo apt -y install dialog; echo \"exit $?\"" # supressing exit code.
-  #   ]
-  # }
-
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline         = [
-  #     "DEBIAN_FRONTEND=noninteractive sudo apt-get install -y -q; echo \"exit $?\""
-  #   ]
-  # }
-
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline         = [
-  #     "echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections", 
-  #     "sudo apt-get install -y -q"
-  #   ]
-  # }
-
   ### Public cert block to verify other consul agents ###
 
   provisioner "shell" {
@@ -236,40 +190,6 @@ build {
 
   ### End public cert block to verify other consul agents ###
 
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline         = [
-  #     "sudo apt-get -y update"
-  #   ]
-  # }
-
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline         = [ 
-  #     "sudo apt-get install dpkg -y"
-  #   ]
-  # }
-
-  # provisioner "shell" {
-  #   inline_shebang = "/bin/bash -e"
-  #   # only           = ["amazon-ebs.openvpn-server-ami"]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline         = [ 
-  #     "sudo apt-get -y install python3",
-  #     "sudo apt-get -y install python-apt",
-  #     "sudo apt install -y python3-pip",
-  #     "python3 -m pip install --upgrade pip",
-  #     "python3 -m pip install boto3",
-  #     "python3 -m pip --version",
-  #     "sudo apt-get install -y git",
-  #     "echo '...Finished bootstrapping'"
-  #   ]
-  # }
-
   provisioner "ansible" {
     extra_arguments = [
       "-v",
@@ -286,14 +206,7 @@ build {
     # only           = ["amazon-ebs.openvpn-server-ami"]
   }
 
-  # provisioner "shell" {
-  #   inline = ["mkdir -p /tmp/terraform-aws-vault/modules"]
-  # }
 
-  # provisioner "file" {
-  #   destination = "/tmp/terraform-aws-vault/modules"
-  #   source      = "${local.template_dir}/../../terraform-aws-vault/modules/"
-  # }
 
   provisioner "file" {
     destination = "/tmp/sign-request.py"
@@ -334,31 +247,8 @@ build {
       " /tmp/terraform-aws-consul/modules/install-consul/install-consul --download-url ${var.consul_download_url};",
       "else",
       " /tmp/terraform-aws-consul/modules/install-consul/install-consul --version ${var.consul_version};",
-    "fi"]
+      "fi"]
   }
-
-  # provisioner "file" { # the default resolv conf may not be configured correctly since it has a ref to non FQDN hostname.  this may break again if it is being misconfigured on boot which has been observed in ubuntu 18
-  #   destination = "/tmp/resolv.conf"
-  #   source      = "${local.template_dir}/resolv.conf"
-  # }
-
-  # provisioner "shell" {
-  #   inline = [
-  #     "set -x; sudo mv /tmp/resolv.conf /run/systemd/resolve/resolv.conf",
-  #     "set -x; sudo cat /etc/resolv.conf",
-  #     "set -x; sudo cat /run/systemd/resolve/resolv.conf",
-  #     "/tmp/terraform-aws-consul/modules/setup-systemd-resolved/setup-systemd-resolved",
-  #     "set -x; sudo cat /run/systemd/resolve/resolv.conf",
-  #     "sudo unlink /etc/resolv.conf",
-  #     "sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf", # resolve.conf initial link isn't configured with a sane default.
-  #     "set -x; sudo cat /etc/resolv.conf",
-  #     "sudo systemctl daemon-reload",
-  #     "echo 'is the host name in /etc/hostname and /etc/hosts ?'",
-  #     "sudo cat /etc/hostname",
-  #     "sudo cat /etc/hosts"
-  #   ]
-  #   # only   = ["amazon-ebs.ubuntu18-ami"]
-  # }
 
   provisioner "shell" { # Generate certificates with vault.
     inline = [
@@ -389,50 +279,6 @@ build {
     # only              = ["amazon-ebs.centos7-ami"]
   }
 
-
-  # provisioner "shell" { # We install with bash instead of ansible due to some permissions and connections issues, probably to do with ansible tmp dir on the official open vpn AMI.
-  #   inline = [
-  #     "set -x; sudo apt install -y fping",
-  #     "sleep 60",
-  #     # "python3 -m pip install apt",
-  #     # "set -x; python3 -m pip install netaddr",
-  #     # "sleep 60",
-  #     "set -x; python3 -m pip install passlib",
-  #     "sleep 60",
-  #     "set -x; python3 -m pip install requests",
-  #     "sleep 60",
-  #     "set -x; python3 -m pip install pexpect",
-  #     "sleep 60",
-  #     "set -x; sudo apt-get install -y whois",
-  #     "sleep 60",
-  #     "set -x; sudo apt-get install -y zip",
-  #     "sleep 60",
-  #     "set -x; sudo apt-get install -y rng-tools ",
-  #     "sleep 60",
-  #     "set -x; sudo apt-get install -y gpgv2",
-  #     "sleep 60",
-  #     "set -x; sudo apt-get install -y jq",
-  #     "sleep 60",
-  #     "set -x; sudo apt-get install -y nfs-common",
-  #     "sleep 60",
-  #     # "set -x; sudo apt-get install -y whois zip rng-tools gpgv2 jq nfs-common",
-  #     # "sleep 60",
-  #     "set -x; sudo apt-get install -y inotify-tools", # Used to catch existance of interrupt file https://stackoverflow.com/questions/18893283/how-to-proceed-in-the-script-if-file-exists
-  #     "sleep 60",
-  #     # "set -x; sudo apt-get install -y dnsmasq", # not for ubuntu 18 - we now use systemd-resolvd
-  #     # "sleep 60"
-  #   ]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline_shebang   = "/bin/bash -e"
-  # }
-
-  # gateway vars
-  # vpn_address=${local.vpn_address} private_domain_name=${var.private_domain_name} 
-  # private_ip=${local.private_ip} 
-
-  # server vars, try to handle this with user data instead.
-
-
   provisioner "ansible" {
     extra_arguments = [
       "-v",
@@ -459,6 +305,9 @@ build {
     inline            = ["set -x; sleep 120"]
     # only              = ["amazon-ebs.centos7-ami"]
   }
+
+  ### Configure VPN
+
   provisioner "shell" {
     inline = [
       "echo 'init success'",
