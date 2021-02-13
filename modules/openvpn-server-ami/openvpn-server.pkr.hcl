@@ -70,6 +70,10 @@ variable "openvpn_server_base_ami" {
   type = string
 }
 
+variable "aws_domain" {
+  type = string
+}
+
 locals {
   timestamp           = regex_replace(timestamp(), "[- TZ:]", "")
   template_dir        = path.root
@@ -333,7 +337,7 @@ build {
     extra_arguments = [
       "-v",
       "--extra-vars",
-      "ansible_distribution=Ubuntu ansible_python_interpreter=/usr/bin/python package_python_interpreter=/usr/bin/python variable_host=default variable_connect_as_user=openvpnas variable_user=openvpnas variable_become_user=openvpnas delegate_host=localhost private_subnet1=${local.private_subnet1} public_subnet1=${local.public_subnet1} remote_subnet_cidr=${local.remote_subnet_cidr} client_network=${local.client_network} client_netmask_bits=${local.client_netmask_bits}",
+      "aws_domain=${var.aws_domain} ansible_distribution=Ubuntu ansible_python_interpreter=/usr/bin/python package_python_interpreter=/usr/bin/python variable_host=default variable_connect_as_user=openvpnas variable_user=openvpnas variable_become_user=openvpnas delegate_host=localhost private_subnet1=${local.private_subnet1} public_subnet1=${local.public_subnet1} remote_subnet_cidr=${local.remote_subnet_cidr} client_network=${local.client_network} client_netmask_bits=${local.client_netmask_bits}",
       "--skip-tags",
       "user_access"
     ]
