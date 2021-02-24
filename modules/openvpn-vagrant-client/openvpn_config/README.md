@@ -1,0 +1,1 @@
+Ensure you copy the open vpn configuration files here after your server is up.
