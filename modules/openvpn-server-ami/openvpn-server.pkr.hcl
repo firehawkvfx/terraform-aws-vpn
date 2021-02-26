@@ -314,25 +314,25 @@ build {
 
   ### Configure VPN
 
-  provisioner "shell" {
-    inline = [
-      "echo 'init success'",
-      "sudo echo 'sudo echo test'",
-      "unset HISTFILE",
-      "history -cw",
-      "echo === Waiting for Cloud-Init ===",
-      "timeout 180 /bin/bash -c 'until stat /var/lib/cloud/instance/boot-finished &>/dev/null; do echo waiting...; sleep 6; done'",
-      "echo === System Packages ===",
-      "echo 'Connected success. Wait for updates to finish...'", # Open VPN AMI runs apt daily update which must end before we continue.
-      "sudo systemd-run --property='After=apt-daily.service apt-daily-upgrade.service' --wait /bin/true; echo \"Done: exit code $?\""
-    ]
-    environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-    inline_shebang   = "/bin/bash -e"
-  }
-  provisioner "shell" {
-    inline = ["set -x; sleep 120"]
-    # only              = ["amazon-ebs.centos7-ami"]
-  }
+  # provisioner "shell" {
+  #   inline = [
+  #     "echo 'init success'",
+  #     "sudo echo 'sudo echo test'",
+  #     "unset HISTFILE",
+  #     "history -cw",
+  #     "echo === Waiting for Cloud-Init ===",
+  #     "timeout 180 /bin/bash -c 'until stat /var/lib/cloud/instance/boot-finished &>/dev/null; do echo waiting...; sleep 6; done'",
+  #     "echo === System Packages ===",
+  #     "echo 'Connected success. Wait for updates to finish...'", # Open VPN AMI runs apt daily update which must end before we continue.
+  #     "sudo systemd-run --property='After=apt-daily.service apt-daily-upgrade.service' --wait /bin/true; echo \"Done: exit code $?\""
+  #   ]
+  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
+  #   inline_shebang   = "/bin/bash -e"
+  # }
+  # provisioner "shell" {
+  #   inline = ["set -x; sleep 120"]
+  #   # only              = ["amazon-ebs.centos7-ami"]
+  # }
 
   # provisioner "ansible" {
   #   extra_arguments = [
