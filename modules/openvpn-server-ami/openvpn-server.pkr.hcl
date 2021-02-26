@@ -81,24 +81,24 @@ locals {
   public_subnet1      = vault("/${var.resourcetier}/data/network/public_subnet1", "value")
   remote_subnet_cidr  = vault("/${var.resourcetier}/data/network/remote_subnet_cidr", "value")
   vpn_cidr            = vault("/${var.resourcetier}/data/network/vpn_cidr", "value")
-  openvpn_admin_pw     = vault("/${var.resourcetier}/data/network/openvpn_admin_pw", "value")
-  client_network      = element( split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value") ), 0 )
-  client_netmask_bits = element( split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value") ), 1 )
+  openvpn_admin_pw    = vault("/${var.resourcetier}/data/network/openvpn_admin_pw", "value")
+  client_network      = element(split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value")), 0)
+  client_netmask_bits = element(split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value")), 1)
 }
 
 source "amazon-ebs" "openvpn-server-ami" {
-  ami_description      = "An Open VPN Access Server AMI configured for Firehawk"
-  ami_name             = "firehawk-openvpn-server-${local.timestamp}-{{uuid}}"
-  instance_type        = "t2.micro"
-  region               = "${var.aws_region}"
-  source_ami           = "${var.openvpn_server_base_ami}"
-  user_data            = <<EOF
+  ami_description = "An Open VPN Access Server AMI configured for Firehawk"
+  ami_name        = "firehawk-openvpn-server-${local.timestamp}-{{uuid}}"
+  instance_type   = "t2.micro"
+  region          = "${var.aws_region}"
+  source_ami      = "${var.openvpn_server_base_ami}"
+  user_data       = <<EOF
 #! /bin/bash
 admin_user=openvpnas
-admin_pw="${var.openvpn_admin_pw}"
+admin_pw="${local.openvpn_admin_pw}"
 EOF
-  ssh_username         = "openvpnas"
-  
+  ssh_username    = "openvpnas"
+
   vpc_id               = "${var.vpc_id}"
   subnet_id            = "${var.subnet_id}"
   security_group_id    = "${var.security_group_id}"
@@ -253,7 +253,7 @@ build {
       " /tmp/terraform-aws-consul/modules/install-consul/install-consul --download-url ${var.consul_download_url};",
       "else",
       " /tmp/terraform-aws-consul/modules/install-consul/install-consul --version ${var.consul_version};",
-      "fi"]
+    "fi"]
   }
 
   provisioner "shell" { # Generate certificates with vault.
@@ -269,15 +269,15 @@ build {
       # test=$(ls -A); if [[ $? != 0 ]]; then; echo "Command failed."; fi
       "set -x; dig @127.0.0.1 vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check consul will resolve vault
       "set -x; dig @localhost vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost will resolve vault
-      "set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check default lookup will resolve vault
-      ]
+      "set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",            # check default lookup will resolve vault
+    ]
   }
 
   provisioner "shell" {
     expect_disconnect = true
     inline            = ["set -x; sudo reboot; sleep 60"]
-    environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-    inline_shebang   = "/bin/bash -e"
+    environment_vars  = ["DEBIAN_FRONTEND=noninteractive"]
+    inline_shebang    = "/bin/bash -e"
   }
   provisioner "shell" {
     expect_disconnect = true
@@ -330,7 +330,7 @@ build {
     inline_shebang   = "/bin/bash -e"
   }
   provisioner "shell" {
-    inline            = ["set -x; sleep 120"]
+    inline = ["set -x; sleep 120"]
     # only              = ["amazon-ebs.centos7-ami"]
   }
 
