@@ -73,14 +73,13 @@ data "vault_generic_secret" "vpn_cidr" { # Get the map of data at the path
   path = "${local.mount_path}/network/vpn_cidr"
 }
 
-data "vault_generic_secret" "remote_public_ip" { # Get the map of data at the path
-  path = "${local.mount_path}/network/remote_public_ip"
-}
-
 data "vault_generic_secret" "remote_subnet_cidr" { # Get the map of data at the path
   path = "${local.mount_path}/network/remote_subnet_cidr"
 }
 
+data "vault_generic_secret" "remote_public_ip" { # Get the map of data at the path
+  path = "${local.mount_path}/network/remote_public_ip"
+}
 data "vault_generic_secret" "openvpn_user_pw" { # Get the map of data at the path
   path = "${local.mount_path}/network/openvpn_user_pw"
 }
@@ -99,9 +98,11 @@ locals {
   private_subnets            = sort(data.aws_subnet_ids.private.ids)
   private_subnet_cidr_blocks = [for s in data.aws_subnet.private : s.cidr_block]
   private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
+
   vpn_cidr                   = lookup(data.vault_generic_secret.vpn_cidr.data, "value")
-  remote_public_ip           = lookup(data.vault_generic_secret.remote_public_ip.data, "value")
   remote_subnet_cidr         = lookup(data.vault_generic_secret.remote_subnet_cidr.data, "value")
+
+  remote_public_ip           = lookup(data.vault_generic_secret.remote_public_ip.data, "value")
   private_route_table_ids    = sort(data.aws_route_tables.private.ids)
   public_route_table_ids     = sort(data.aws_route_tables.public.ids)
   public_domain_name         = "none"
