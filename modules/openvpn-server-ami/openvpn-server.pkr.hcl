@@ -148,12 +148,23 @@ build {
     inline_shebang   = "/bin/bash -e"
   }
 
+  provisioner "file" { # fix apt upgrades to not hold up boot
+    destination = "/tmp/override.conf"
+    source      = "${local.template_dir}/override.conf"
+  }
+  provisioner "shell" {
+    inline = [
+      "sudo mv /tmp/override.conf /etc/systemd/system/apt-daily.timer.d/override.conf"
+      "sudo chmod 0644 /etc/systemd/system/apt-daily.timer.d/override.conf"
+    ]
+    inline_shebang = "/bin/bash -e"
+  }
+
   ### Public cert block to verify other consul agents ###
 
   provisioner "shell" {
     inline = ["mkdir -p /tmp/terraform-aws-vault/modules"]
   }
-
   provisioner "file" {
     destination = "/tmp/terraform-aws-vault/modules"
     source      = "${local.template_dir}/../../../terraform-aws-vault/modules/"
