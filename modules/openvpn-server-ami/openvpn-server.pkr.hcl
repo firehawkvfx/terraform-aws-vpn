@@ -287,9 +287,15 @@ build {
       "set -x; dig @127.0.0.1 vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check consul will resolve vault
       "set -x; dig @localhost vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost will resolve vault
       "set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",            # check default lookup will resolve vault
-      "echo \"Current Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
-      "echo \"Current Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\"",
     ]
+  }
+
+  provisioner "shell" { # Query IP.
+    inline = [
+      "echo \"Current Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
+      "echo \"Current Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\""
+    ]
+    environment_vars = ["AWS_DEFAULT_REGION=${var.aws_region}"]
   }
 
   provisioner "shell" {
@@ -320,16 +326,16 @@ build {
     # only           = ["amazon-ebs.openvpn-server-ami"]
   }
 
-  provisioner "shell" {
-    expect_disconnect = true
-    inline            = ["set -x; sudo reboot"]
-    # only              = ["amazon-ebs.centos7-ami"]
-  }
-  provisioner "shell" {
-    expect_disconnect = true
-    inline            = ["set -x; sleep 120"]
-    # only              = ["amazon-ebs.centos7-ami"]
-  }
+  # provisioner "shell" {
+  #   expect_disconnect = true
+  #   inline            = ["set -x; sudo reboot"]
+  #   # only              = ["amazon-ebs.centos7-ami"]
+  # }
+  # provisioner "shell" {
+  #   expect_disconnect = true
+  #   inline            = ["set -x; sleep 120"]
+  #   # only              = ["amazon-ebs.centos7-ami"]
+  # }
 
   ### Configure VPN
 
