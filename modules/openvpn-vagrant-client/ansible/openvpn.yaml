@@ -18,13 +18,13 @@
 #     delegate_to: localhost
 #     delegate_facts: true
 
-- name: Verify hosts
-  hosts: localhost
-  gather_facts: no
-  tasks:
+# - name: Verify hosts
+#   hosts: localhost
+#   gather_facts: no
+#   tasks:
 
-  - assert:
-      that: hosts_confirmed | default(false) # A method that verifies the host was reached.
+#   - assert:
+#       that: hosts_confirmed | default(false) # A method that verifies the host was reached.
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
@@ -122,7 +122,7 @@
 #   roles:
 #     - role: openvpn
 
-- hosts: firehawkgateway
+- hosts: "{{ variable_host | default('firehawk_gateway') }}"
   remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true

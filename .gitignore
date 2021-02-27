@@ -1,3 +1,4 @@
 modules/openvpn-vagrant-client/tmp/
 modules/openvpn-vagrant-client/.vagrant/
 modules/secrets/*
+modules/openvpn-vagrant-client/openvpn_config/*

@@ -134,6 +134,8 @@ build {
   ]
   provisioner "shell" {
     inline = [
+      "echo \"Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
+      "echo \"Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\"",
       "echo 'Init success'",
       "unset HISTFILE",
       "history -cw",
