@@ -154,7 +154,7 @@ build {
   }
   provisioner "shell" {
     inline = [
-      "sudo mv /tmp/override.conf /etc/systemd/system/apt-daily.timer.d/override.conf"
+      "sudo mv /tmp/override.conf /etc/systemd/system/apt-daily.timer.d/override.conf",
       "sudo chmod 0644 /etc/systemd/system/apt-daily.timer.d/override.conf"
     ]
     inline_shebang = "/bin/bash -e"
