@@ -157,8 +157,8 @@ build {
       "sudo cp /tmp/override.conf /etc/systemd/system/apt-daily.timer.d/override.conf",
       "sudo mkdir -p /etc/systemd/system/apt-daily-upgrade.timer.d",
       "sudo cp /tmp/override.conf /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf",
-      "sudo rm -f /tmp/override.conf"
-      "sudo chmod 0644 /etc/systemd/system/apt-daily.timer.d/override.conf"
+      "sudo rm -f /tmp/override.conf",
+      "sudo chmod 0644 /etc/systemd/system/apt-daily.timer.d/override.conf",
       "sudo systemctl daemon-reload",
       "sudo systemctl cat apt-daily{,-upgrade}.timer",
       "sudo systemctl --all list-timers apt-daily{,-upgrade}.timer"
