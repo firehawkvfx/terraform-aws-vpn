@@ -134,8 +134,6 @@ build {
   ]
   provisioner "shell" {
     inline = [
-      "echo \"Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
-      "echo \"Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\"",
       "echo 'Init success'",
       "unset HISTFILE",
       "history -cw",
@@ -289,6 +287,8 @@ build {
       "set -x; dig @127.0.0.1 vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check consul will resolve vault
       "set -x; dig @localhost vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost will resolve vault
       "set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",            # check default lookup will resolve vault
+      "echo \"Current Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
+      "echo \"Current Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\"",
     ]
   }
 
