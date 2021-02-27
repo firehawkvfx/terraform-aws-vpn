@@ -128,6 +128,8 @@ output "public_ip" {
 }
 
 module "vpn" {
+  source = "./modules/tf_aws_openvpn"
+  
   create_vpn = true
 
   # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
@@ -135,7 +137,7 @@ module "vpn" {
 
   ami = var.openvpn_server_ami
 
-  source = "./modules/tf_aws_openvpn"
+
 
   route_public_domain_name = var.route_public_domain_name
 
