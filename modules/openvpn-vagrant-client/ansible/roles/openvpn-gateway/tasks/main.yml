@@ -40,20 +40,6 @@
     line: 'push "redirect-gateway def1 bypass-dhcp"'
     insertafter: auth-user-pass
 
-- name: replace
-  lineinfile:
-    path: /home/deployuser/openvpn_config/openvpn.conf
-    state: present
-    regexp: '^(.*)# OVPN_ACCESS_SERVER_PROFILE=(.*)$'
-    line: '# OVPN_ACCESS_SERVER_PROFILE={{ openvpn_user }}@{{ vpn_address }}/AUTOLOGIN'
-
-- name: insert OVPN_ACCESS_SERVER_AUTOLOGIN=1 after OVPN_ACCESS_SERVER_PROFILE
-  lineinfile:
-    path: /home/deployuser/openvpn_config/openvpn.conf
-    state: present
-    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
-    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
-
 - name: test update -
   debug:
     msg: "updating autologin. {{ softnas1_private_ip1 }}"
