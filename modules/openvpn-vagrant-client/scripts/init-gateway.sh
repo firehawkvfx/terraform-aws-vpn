@@ -63,4 +63,4 @@ ansible-playbook ansible/init.yaml -v --extra-vars "variable_host=localhost dele
 # enable ipforwarding
 ansible-playbook ansible/openvpn-init.yaml -v --extra-vars "variable_host=localhost" --tags "init"; exit_test
 # establish connection - certs must be present
-ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$2 openvpn_user_pw=$3"; exit_test
+# ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$2 openvpn_user_pw=$3"; exit_test

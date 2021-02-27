@@ -159,7 +159,6 @@ Vagrant.configure(2) do |config|
         
             # we define the location of the ansible hosts file in an environment variable.
             node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' | sudo tee -a /etc/environment"
-            # node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/transparent-hugepages-disable.yml" # mongo requires no transparent hugepages
             # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
             # node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
             # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
@@ -183,13 +182,14 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "sudo reboot"
             node.vm.provision :reload
             # end
+            node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars \"variable_host=localhost openvpn_user=#{ENV['openvpn_user']} openvpn_user_pw=#{ENV['openvpn_user_pw']}\"" # Connect vpn
             node.vm.post_up_message = "Machine is up IP: #{machine[:box]}"
 
             node.trigger.before :destroy, :halt, :reload do |trigger|
                 trigger.info = "Stopping node..."
                 trigger.run = {inline: "echo 'stopping node'"}
                 # trigger.run = {inline: "sleep 5"}
-              end
+            end
         end
     end
     # if box_file_in.nil? || box_file_in.empty?
