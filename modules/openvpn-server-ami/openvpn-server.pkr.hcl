@@ -134,8 +134,7 @@ build {
   ]
   provisioner "shell" {
     inline = [
-      "echo 'init success'",
-      "sudo echo 'sudo echo test'",
+      "echo 'Init success'",
       "unset HISTFILE",
       "history -cw",
       "echo === Waiting for Cloud-Init ===",
@@ -154,6 +153,7 @@ build {
   }
   provisioner "shell" {
     inline = [
+      "sudo mkdir -p /etc/systemd/system/apt-daily.timer.d",
       "sudo mv /tmp/override.conf /etc/systemd/system/apt-daily.timer.d/override.conf",
       "sudo chmod 0644 /etc/systemd/system/apt-daily.timer.d/override.conf"
     ]
