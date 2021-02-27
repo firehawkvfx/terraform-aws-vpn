@@ -156,6 +156,9 @@ build {
       "sudo mkdir -p /etc/systemd/system/apt-daily.timer.d",
       "sudo mv /tmp/override.conf /etc/systemd/system/apt-daily.timer.d/override.conf",
       "sudo chmod 0644 /etc/systemd/system/apt-daily.timer.d/override.conf"
+      "sudo systemctl daemon-reload",
+      "sudo systemctl cat apt-daily{,-upgrade}.timer",
+      "sudo systemctl --all list-timers apt-daily{,-upgrade}.timer"
     ]
     inline_shebang = "/bin/bash -e"
   }
