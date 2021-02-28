@@ -12,10 +12,6 @@
   become_user: deployuser
   become: true
   with_items:
-    - ca.crt
-    - client.crt
-    - client.key
-    - ta.key
     - openvpn.conf
 
 - name: Create open vpn autologin 
@@ -52,10 +48,6 @@
   become: true
   with_items:
     - openvpn.conf
-    - ca.crt
-    - client.crt
-    - client.key
-    - ta.key
     - yourserver.txt
 
 - name: Ansible allow autostart, uncomment
