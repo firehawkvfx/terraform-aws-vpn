@@ -1,14 +1,6 @@
 # - bring up the vpn
 # - bring up the vagrant host.
-# - export these vars and run:
-# export vpn_address= # The public host name or public ip of the vpn
-# export private_subnet1=10.4.1.0/24 # The AWS private subnet to route traffic to.
-# export public_subnet1=10.4.101.0/24 # The AWS public subnet to route traffic to.
-# export remote_subnet_cidr= # The remote private subnet of your onsite location 
-# export client_network=172.19.232.0 # The network for dhcp addresses used for the vpn. The default should work. eg if cidr os 172.19.232.0/24, we use 172.19.232.0
-# export client_netmask_bits=24 # The netmask for the above network to resolve the cidr range. eg if cidr os 172.19.232.0/24, we use 24
-# ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost vpn_address=$vpn_address private_subnet1=$private_subnet1 public_subnet1=$public_subnet1 remote_subnet_cidr=$remote_subnet_cidr client_network=$client_network client_netmask_bits=$client_netmask_bits"; exit_test
-
+# - start with: openvpn_user=openvpnas openvpn_user_pw=MYVPNPASSWORDFROMVAULT vagrant up
 # ensure the version of virutal box installed matches all dependencies - VirtualBox 6.0.14:
 # further notes on plugin versions at the end of this script
 
@@ -156,16 +148,10 @@ Vagrant.configure(2) do |config|
             end
             # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
             node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
-        
             # we define the location of the ansible hosts file in an environment variable.
             node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' | sudo tee -a /etc/environment"
-            # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
-            # node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
-            # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
-            # disable password authentication - ssh key only.
             node.vm.provision "shell", inline: <<-EOC
                 sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-                # sudo service ssh restart # restart required if not restarting service
             EOC
             node.vm.provision "shell", inline: "sudo reboot"
             node.vm.provision :reload
@@ -174,14 +160,9 @@ Vagrant.configure(2) do |config|
             end
             if machine[:hostname].include? "firehawkgateway"
                 node.vm.provision "shell", inline: "set -x; export openfirehawkserver_name=#{openfirehawkserver_name}; export openfirehawkserver_ip=#{openfirehawkserver_ip} ; /deployuser/scripts/init-gateway.sh --#{envtier} #{ENV['openvpn_user']} #{ENV['openvpn_user_pw']}"
-                # register address for gateway below
-                # node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --#{resourcetier} --init; echo $config_override; ansible-playbook ansible/get_host_ip.yml -v --extra-vars 'update_openfirehawkserver_ip_var=true'" # config_override=#{ENV['config_override']}
             end
-            # node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --#{resourcetier} --init; ./scripts/ci-set-vm-init.sh" # set the var that tracks if the vm has be fully initialised to false. firehawk.sh will finish initialisaiton.
-            
             node.vm.provision "shell", inline: "sudo reboot"
             node.vm.provision :reload
-            # end
             node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars \"variable_host=localhost openvpn_user=#{ENV['openvpn_user']} openvpn_user_pw=#{ENV['openvpn_user_pw']}\"" # Connect vpn
             node.vm.post_up_message = "Machine is up IP: #{machine[:box]}"
 
