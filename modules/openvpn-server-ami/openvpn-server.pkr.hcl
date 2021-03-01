@@ -70,6 +70,10 @@ variable "openvpn_server_base_ami" {
   type = string
 }
 
+variable "provisioner_iam_profile_name" {
+  type = string
+}
+
 variable "aws_internal_domain" {
   type = string
 }
@@ -102,7 +106,7 @@ EOF
   vpc_id               = "${var.vpc_id}"
   subnet_id            = "${var.subnet_id}"
   security_group_id    = "${var.security_group_id}"
-  iam_instance_profile = "provisioner_instance_role_pipeid0"
+  iam_instance_profile = var.provisioner_iam_profile_name
 }
 
 # source "amazon-ebs" "openvpn-server-ami" { # Open vpn server requires vault and consul, so we build it here as well.
