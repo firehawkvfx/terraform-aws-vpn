@@ -73,12 +73,12 @@ data "vault_generic_secret" "vpn_cidr" { # Get the map of data at the path
   path = "${local.mount_path}/network/vpn_cidr"
 }
 
-data "vault_generic_secret" "remote_subnet_cidr" { # Get the map of data at the path
-  path = "${local.mount_path}/network/remote_subnet_cidr"
+data "vault_generic_secret" "onsite_private_subnet_cidr" { # Get the map of data at the path
+  path = "${local.mount_path}/network/onsite_private_subnet_cidr"
 }
 
-data "vault_generic_secret" "remote_public_ip" { # Get the map of data at the path
-  path = "${local.mount_path}/network/remote_public_ip"
+data "vault_generic_secret" "onsite_public_ip" { # Get the map of data at the path
+  path = "${local.mount_path}/network/onsite_public_ip"
 }
 data "vault_generic_secret" "openvpn_user_pw" { # Get the map of data at the path
   path = "${local.mount_path}/network/openvpn_user_pw"
@@ -100,9 +100,9 @@ locals {
   private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
 
   vpn_cidr                   = lookup(data.vault_generic_secret.vpn_cidr.data, "value")
-  remote_subnet_cidr         = lookup(data.vault_generic_secret.remote_subnet_cidr.data, "value")
+  onsite_private_subnet_cidr         = lookup(data.vault_generic_secret.onsite_private_subnet_cidr.data, "value")
 
-  remote_public_ip           = lookup(data.vault_generic_secret.remote_public_ip.data, "value")
+  onsite_public_ip           = lookup(data.vault_generic_secret.onsite_public_ip.data, "value")
   private_route_table_ids    = sort(data.aws_route_tables.private.ids)
   public_route_table_ids     = sort(data.aws_route_tables.public.ids)
   public_domain_name         = "none"
@@ -157,9 +157,9 @@ module "vpn" {
   vpc_cidr           = local.vpc_cidr
   vpn_cidr           = local.vpn_cidr
   public_subnet_ids  = local.public_subnets
-  remote_vpn_ip_cidr = "${local.remote_public_ip}/32"
-  remote_ssh_ip_cidr = var.remote_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
-  remote_subnet_cidr = local.remote_subnet_cidr
+  remote_vpn_ip_cidr = "${local.onsite_public_ip}/32"
+  remote_ssh_ip_cidr = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
+  onsite_private_subnet_cidr = local.onsite_private_subnet_cidr
 
   private_route_table_ids = local.private_route_table_ids
   public_route_table_ids  = local.public_route_table_ids

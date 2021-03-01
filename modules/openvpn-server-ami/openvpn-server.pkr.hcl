@@ -79,7 +79,7 @@ locals {
   template_dir        = path.root
   private_subnet1     = vault("/${var.resourcetier}/data/network/private_subnet1", "value")
   public_subnet1      = vault("/${var.resourcetier}/data/network/public_subnet1", "value")
-  remote_subnet_cidr  = vault("/${var.resourcetier}/data/network/remote_subnet_cidr", "value")
+  onsite_private_subnet_cidr  = vault("/${var.resourcetier}/data/network/onsite_private_subnet_cidr", "value")
   vpn_cidr            = vault("/${var.resourcetier}/data/network/vpn_cidr", "value")
   openvpn_admin_pw    = vault("/${var.resourcetier}/data/network/openvpn_admin_pw", "value")
   client_network      = element(split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value")), 0)

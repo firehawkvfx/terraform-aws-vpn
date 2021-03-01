@@ -25,6 +25,6 @@ variable "resourcetier" {
   description = "The default resource tier - dev/green/blue/main"
 }
 
-variable "remote_ip_cidr" {
+variable "deployer_ip_cidr" {
   description = "The IP enabled for SSH access to the vpn access server"
 }
