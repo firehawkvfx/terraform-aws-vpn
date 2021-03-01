@@ -165,7 +165,7 @@ module "vpn" {
   public_route_table_ids  = local.public_route_table_ids
 
   # EC2 Inputs
-  aws_key_name = "main-deployment"
+  aws_key_name = "deployuser-${var.resourcetier}"
   # private_key          = local.private_key
   # aws_private_key_path = var.aws_private_key_path
   instance_type = var.instance_type
