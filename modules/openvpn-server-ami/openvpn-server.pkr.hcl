@@ -81,13 +81,7 @@ variable "aws_internal_domain" {
 locals {
   timestamp           = regex_replace(timestamp(), "[- TZ:]", "")
   template_dir        = path.root
-  private_subnet1     = vault("/${var.resourcetier}/data/network/private_subnet1", "value")
-  public_subnet1      = vault("/${var.resourcetier}/data/network/public_subnet1", "value")
-  onsite_private_subnet_cidr  = vault("/${var.resourcetier}/data/network/onsite_private_subnet_cidr", "value")
-  vpn_cidr            = vault("/${var.resourcetier}/data/network/vpn_cidr", "value")
-  openvpn_admin_pw    = vault("/${var.resourcetier}/data/network/openvpn_admin_pw", "value")
-  client_network      = element(split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value")), 0)
-  client_netmask_bits = element(split("/", vault("/${var.resourcetier}/data/network/vpn_cidr", "value")), 1)
+  # openvpn_admin_pw    = vault("/${var.resourcetier}/data/network/openvpn_admin_pw", "value")
 }
 
 source "amazon-ebs" "openvpn-server-ami" {
@@ -96,10 +90,11 @@ source "amazon-ebs" "openvpn-server-ami" {
   instance_type   = "t2.micro"
   region          = "${var.aws_region}"
   source_ami      = "${var.openvpn_server_base_ami}"
+  # We generate a random pass for the image build.  It will never need to be reused.  When the ami is started, the password is reset to a vault provided value.
   user_data       = <<EOF
 #! /bin/bash
 admin_user=openvpnas
-admin_pw="${local.openvpn_admin_pw}"
+admin_pw=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo '')
 EOF
   ssh_username    = "openvpnas"
 
