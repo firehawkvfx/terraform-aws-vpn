@@ -33,7 +33,7 @@ data "aws_vpc" "primary" {
 }
 data "aws_internet_gateway" "gw" {
   # default = false
-  tags    = local.common_tags
+  tags = local.common_tags
 }
 
 data "aws_subnet_ids" "public" {
@@ -94,13 +94,13 @@ locals {
   private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
 
   vpn_cidr                   = lookup(data.vault_generic_secret.vpn_cidr.data, "value")
-  onsite_private_subnet_cidr         = lookup(data.vault_generic_secret.onsite_private_subnet_cidr.data, "value")
+  onsite_private_subnet_cidr = lookup(data.vault_generic_secret.onsite_private_subnet_cidr.data, "value")
 
-  onsite_public_ip           = lookup(data.vault_generic_secret.onsite_public_ip.data, "value")
-  private_route_table_ids    = sort(data.aws_route_tables.private.ids)
-  public_route_table_ids     = sort(data.aws_route_tables.public.ids)
-  public_domain_name         = "none"
-  route_zone_id              = "none"
+  onsite_public_ip        = lookup(data.vault_generic_secret.onsite_public_ip.data, "value")
+  private_route_table_ids = sort(data.aws_route_tables.private.ids)
+  public_route_table_ids  = sort(data.aws_route_tables.public.ids)
+  public_domain_name      = "none"
+  route_zone_id           = "none"
   # openvpn_user_pw            = lookup(data.vault_generic_secret.openvpn_user_pw.data, "value")
   # openvpn_admin_pw           = lookup(data.vault_generic_secret.openvpn_admin_pw.data, "value")
 }
@@ -123,7 +123,7 @@ output "public_ip" {
 
 module "vpn" {
   source = "./modules/tf_aws_openvpn"
-  
+
   create_vpn = true
 
   # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
@@ -131,7 +131,8 @@ module "vpn" {
 
   ami = var.openvpn_server_ami
 
-
+  consul_cluster_name    = var.consul_cluster_name
+  consul_cluster_tag_key = var.consul_cluster_tag_key
 
   route_public_domain_name = var.route_public_domain_name
 
@@ -147,12 +148,12 @@ module "vpn" {
   resourcetier = var.resourcetier
 
   # VPC Inputs
-  vpc_id             = local.vpc_id
-  vpc_cidr           = local.vpc_cidr
-  vpn_cidr           = local.vpn_cidr
-  public_subnet_ids  = local.public_subnets
-  remote_vpn_ip_cidr = "${local.onsite_public_ip}/32"
-  remote_ssh_ip_cidr = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
+  vpc_id                     = local.vpc_id
+  vpc_cidr                   = local.vpc_cidr
+  vpn_cidr                   = local.vpn_cidr
+  public_subnet_ids          = local.public_subnets
+  remote_vpn_ip_cidr         = "${local.onsite_public_ip}/32"
+  remote_ssh_ip_cidr         = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
   onsite_private_subnet_cidr = local.onsite_private_subnet_cidr
 
   private_route_table_ids = local.private_route_table_ids
