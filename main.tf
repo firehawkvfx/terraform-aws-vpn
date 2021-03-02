@@ -101,8 +101,8 @@ locals {
   public_route_table_ids     = sort(data.aws_route_tables.public.ids)
   public_domain_name         = "none"
   route_zone_id              = "none"
-  openvpn_user_pw            = lookup(data.vault_generic_secret.openvpn_user_pw.data, "value")
-  openvpn_admin_pw           = lookup(data.vault_generic_secret.openvpn_admin_pw.data, "value")
+  # openvpn_user_pw            = lookup(data.vault_generic_secret.openvpn_user_pw.data, "value")
+  # openvpn_admin_pw           = lookup(data.vault_generic_secret.openvpn_admin_pw.data, "value")
 }
 
 output "private_route_table_ids" {
