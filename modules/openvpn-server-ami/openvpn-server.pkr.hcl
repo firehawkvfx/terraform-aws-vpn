@@ -294,6 +294,7 @@ build {
       " set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",            # check default lookup will resolve vault
       "fi",
     ]
+    inline_shebang    = "/bin/bash -e"
   }
 
   provisioner "shell" {
