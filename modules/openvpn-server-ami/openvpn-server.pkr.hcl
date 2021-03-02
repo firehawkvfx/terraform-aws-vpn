@@ -94,7 +94,7 @@ source "amazon-ebs" "openvpn-server-ami" {
   user_data       = <<EOF
 #! /bin/bash
 admin_user=openvpnas
-admin_pw=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo '')
+admin_pw="$(openssl rand -base64 12)"
 EOF
   ssh_username    = "openvpnas"
 
