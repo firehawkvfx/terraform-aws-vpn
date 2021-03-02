@@ -279,22 +279,15 @@ build {
       "set -x; sudo systemctl daemon-reload",
       "set -x; sudo systemctl restart systemd-resolved",
       "set -x; sudo cat /etc/systemd/resolved.conf",
+      
+      
       "set -x; sudo /opt/consul/bin/run-consul --client --cluster-tag-key \"${var.consul_cluster_tag_key}\" --cluster-tag-value \"${var.consul_cluster_tag_value}\"", # this is normally done with user data but dont for convenience here
       "set -x; consul members list",
       "set -x; dig $(hostname) | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost resolve's
-      # test=$(ls -A); if [[ $? != 0 ]]; then; echo "Command failed."; fi
       "set -x; dig @127.0.0.1 vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check consul will resolve vault
       "set -x; dig @localhost vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost will resolve vault
       "set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",            # check default lookup will resolve vault
     ]
-  }
-
-  provisioner "shell" { # Query IP.
-    inline = [
-      "echo \"Current Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
-      "echo \"Current Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\""
-    ]
-    environment_vars = ["AWS_DEFAULT_REGION=${var.aws_region}"]
   }
 
   provisioner "shell" {
@@ -324,39 +317,6 @@ build {
     galaxy_file      = "./requirements.yml"
     # only           = ["amazon-ebs.openvpn-server-ami"]
   }
-
-  # provisioner "shell" {
-  #   expect_disconnect = true
-  #   inline            = ["set -x; sudo reboot"]
-  #   # only              = ["amazon-ebs.centos7-ami"]
-  # }
-  # provisioner "shell" {
-  #   expect_disconnect = true
-  #   inline            = ["set -x; sleep 120"]
-  #   # only              = ["amazon-ebs.centos7-ami"]
-  # }
-
-  ### Configure VPN
-
-  # provisioner "shell" {
-  #   inline = [
-  #     "echo 'init success'",
-  #     "sudo echo 'sudo echo test'",
-  #     "unset HISTFILE",
-  #     "history -cw",
-  #     "echo === Waiting for Cloud-Init ===",
-  #     "timeout 180 /bin/bash -c 'until stat /var/lib/cloud/instance/boot-finished &>/dev/null; do echo waiting...; sleep 6; done'",
-  #     "echo === System Packages ===",
-  #     "echo 'Connected success. Wait for updates to finish...'", # Open VPN AMI runs apt daily update which must end before we continue.
-  #     "sudo systemd-run --property='After=apt-daily.service apt-daily-upgrade.service' --wait /bin/true; echo \"Done: exit code $?\""
-  #   ]
-  #   environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-  #   inline_shebang   = "/bin/bash -e"
-  # }
-  # provisioner "shell" {
-  #   inline = ["set -x; sleep 120"]
-  #   # only              = ["amazon-ebs.centos7-ami"]
-  # }
 
   post-processor "manifest" {
     output     = "${local.template_dir}/manifest.json"
