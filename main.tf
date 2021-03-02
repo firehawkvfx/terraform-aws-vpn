@@ -81,13 +81,6 @@ data "vault_generic_secret" "onsite_private_subnet_cidr" { # Get the map of data
 data "vault_generic_secret" "onsite_public_ip" { # Get the map of data at the path
   path = "${local.mount_path}/network/onsite_public_ip"
 }
-data "vault_generic_secret" "openvpn_user_pw" { # Get the map of data at the path
-  path = "${local.mount_path}/network/openvpn_user_pw"
-}
-
-data "vault_generic_secret" "openvpn_admin_pw" { # Get the map of data at the path
-  path = "${local.mount_path}/network/openvpn_admin_pw"
-}
 
 locals {
   mount_path                 = var.resourcetier
@@ -180,9 +173,7 @@ module "vpn" {
 
   # # OpenVPN Inputs
   openvpn_user       = "openvpnas"
-  openvpn_user_pw    = local.openvpn_user_pw
   openvpn_admin_user = "openvpnas"
-  openvpn_admin_pw   = local.openvpn_admin_pw
 
   # bastion_ip               = module.bastion.public_ip # the vpn is provisioned by the bastion entry point
   # bastion_dependency       = module.bastion.bastion_dependency
