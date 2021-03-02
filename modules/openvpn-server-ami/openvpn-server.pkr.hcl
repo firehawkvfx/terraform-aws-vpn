@@ -285,7 +285,7 @@ build {
       "set -x; sudo systemctl daemon-reload",
       "set -x; sudo systemctl restart systemd-resolved",
       "set -x; sudo cat /etc/systemd/resolved.conf",
-      "if [[ \"${var.test_consul}\" == true ]]; then"
+      "if [[ \"${var.test_consul}\" == true ]]; then", # only test the connection if the var is set.
       " set -x; sudo /opt/consul/bin/run-consul --client --cluster-tag-key \"${var.consul_cluster_tag_key}\" --cluster-tag-value \"${var.consul_cluster_tag_value}\"", # this is normally done with user data but dont for convenience here
       " set -x; consul members list",
       " set -x; dig $(hostname) | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost resolve's
