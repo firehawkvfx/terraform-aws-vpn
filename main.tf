@@ -146,6 +146,7 @@ module "vpn" {
   private_domain_name = local.private_domain
 
   resourcetier = var.resourcetier
+  conflictkey  = var.conflictkey
 
   # VPC Inputs
   vpc_id                     = local.vpc_id
