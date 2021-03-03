@@ -6,25 +6,31 @@ set -e
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 
 if [[ -z "$1" ]]; then
-  echo "Error: 1st arg bastion host must be provided. eg:"
-  echo "VAULT_TOKEN=s.kjh1k4jfdsfhkNe ./copy_vault_file_from_bastion.sh centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+  echo "Error: 1st resourcetier must be provided. eg: dev / main / green / blue"
+  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
   exit 1
 fi
 
 if [[ -z "$2" ]]; then
-  echo "Error: 2nd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
-  echo "VAULT_TOKEN=s.kjh1k4jfdsfhkNe ./copy_vault_file_from_bastion.sh centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+  echo "Error: 2nd arg bastion host must be provided. eg:"
+  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
   exit 1
 fi
 
-if [[ -z "$2" ]]; then
-  echo "Error: env var VAULT_TOKEN must be provided. eg: VAULT_TOKEN=s.kjh1k4jfdsfhkNe"
-  echo "VAULT_TOKEN=s.kjh1k4jfdsfhkNe ./copy_vault_file_from_bastion.sh centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+if [[ -z "$3" ]]; then
+  echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
+  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
   exit 1
 fi
 
-host1="$1"
-host2="$2"
+if [[ -z "$VAULT_TOKEN" ]]; then
+  echo "Provide a vault token to utilise on the private vault client:"
+  read -s -p "VAULT_TOKEN: " VAULT_TOKEN
+fi
+
+resourcetier="$1"
+host1="$2"
+host2="$3"
 
 # Log the given message. All logs are written to stderr with a timestamp.
 function log {
@@ -34,7 +40,7 @@ function log {
 }
 
 log "Requesting files from vault to client in private subnet"
-ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "VAULT_TOKEN=$VAULT_TOKEN bash -s" < ./request_vault_file.sh main
+ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "VAULT_TOKEN=$VAULT_TOKEN bash -s" < ./request_vault_file.sh $resourcetier
 
 function retrieve_file {
   local -r source_path="$1"

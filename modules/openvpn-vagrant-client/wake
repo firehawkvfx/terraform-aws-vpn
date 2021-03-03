@@ -1,0 +1,6 @@
+#!/bin/bash
+
+openvpn_user="openvpnas"
+read -s -p "openvpn_user_pw: " openvpn_user_pw
+
+openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
