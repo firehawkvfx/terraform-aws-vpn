@@ -2,10 +2,23 @@
 
 if [[ -z "$1" ]]; then
     echo "ERROR: 1st args provided must be the resource tier (dev / main) to lookup the ip address you have configured in ipaddresses.json"
+    exit 1
 fi
 export resourcetier="$1"
 
-openvpn_user="openvpnas"
-read -s -p "openvpn_user_pw: " openvpn_user_pw
+echo "resourcetier: $resourcetier"
 
-openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
+openvpn_user="openvpnas"
+
+if [[ -z "$openvpn_user_pw" ]]; then
+    read -s -p "openvpn_user_pw: " openvpn_user_pw
+fi
+
+if [[ -z "$openvpn_user_pw" ]]; then
+    echo "ERROR: provided openvpn_user_pw is empty.  Try again."
+    exit 1
+fi
+
+echo "openvpn_user: $openvpn_user"
+
+openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up; vagrant reload

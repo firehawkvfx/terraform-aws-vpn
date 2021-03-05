@@ -3,7 +3,9 @@
 
 set -e
 
+EXECDIR="$(pwd)"
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+cd "$SCRIPTDIR"
 
 if [[ -z "$1" ]]; then
   echo "Error: 1st resourcetier must be provided. eg: dev / main / green / blue"
@@ -66,3 +68,4 @@ log "...Cleaning up"
 ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "sudo rm -frv /home/centos/tmp/*"
 
 echo "Done."
+cd "$EXECDIR"

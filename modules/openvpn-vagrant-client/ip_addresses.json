@@ -1,9 +1,9 @@
 {
-    "main": { 
+    "main": {
         "gateway_mac": "324AEEACC60C",
         "openfirehawkserver_ip": "192.168.92.40"
     },
-    "dev": { 
+    "dev": {
         "gateway_mac": "6601AB2A94E5",
         "openfirehawkserver_ip": "192.168.92.10"
     }

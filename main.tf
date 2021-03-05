@@ -16,7 +16,7 @@ locals {
   common_tags = {
     environment  = var.environment
     resourcetier = var.resourcetier
-    conflictkey  = "${var.resourcetier}${var.pipelineid}"
+    conflictkey  = var.conflictkey
     # The conflict key defines a name space where duplicate resources in different deployments sharing this name are prevented from occuring.  This is used to prevent a new deployment overwriting and existing resource unless it is destroyed first.
     # examples might be blue, green, dev1, dev2, dev3...dev100.  This allows us to lock deployments on some resources.
     pipelineid = var.pipelineid
