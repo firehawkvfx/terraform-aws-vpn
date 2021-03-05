@@ -70,17 +70,17 @@ data "vault_generic_secret" "private_domain" { # Get the map of data at the path
   path = "${local.mount_path}/network/private_domain"
 }
 
-data "vault_generic_secret" "vpn_cidr" { # Get the map of data at the path
-  path = "${local.mount_path}/network/vpn_cidr"
-}
+# data "vault_generic_secret" "vpn_cidr" { # Get the map of data at the path
+#   path = "${local.mount_path}/network/vpn_cidr"
+# }
 
-data "vault_generic_secret" "onsite_private_subnet_cidr" { # Get the map of data at the path
-  path = "${local.mount_path}/network/onsite_private_subnet_cidr"
-}
+# data "vault_generic_secret" "onsite_private_subnet_cidr" { # Get the map of data at the path
+#   path = "${local.mount_path}/network/onsite_private_subnet_cidr"
+# }
 
-data "vault_generic_secret" "onsite_public_ip" { # Get the map of data at the path
-  path = "${local.mount_path}/network/onsite_public_ip"
-}
+# data "vault_generic_secret" "onsite_public_ip" { # Get the map of data at the path
+#   path = "${local.mount_path}/network/onsite_public_ip"
+# }
 
 locals {
   mount_path                 = var.resourcetier
@@ -93,10 +93,10 @@ locals {
   private_subnet_cidr_blocks = [for s in data.aws_subnet.private : s.cidr_block]
   private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
 
-  vpn_cidr                   = lookup(data.vault_generic_secret.vpn_cidr.data, "value")
-  onsite_private_subnet_cidr = lookup(data.vault_generic_secret.onsite_private_subnet_cidr.data, "value")
+  vpn_cidr                   = var.vpn_cidr
+  onsite_private_subnet_cidr = var.onsite_private_subnet_cidr
 
-  onsite_public_ip        = lookup(data.vault_generic_secret.onsite_public_ip.data, "value")
+  onsite_public_ip        = var.onsite_public_ip
   private_route_table_ids = sort(data.aws_route_tables.private.ids)
   public_route_table_ids  = sort(data.aws_route_tables.public.ids)
   public_domain_name      = "none"
