@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ -z "$1" ]]; then
+    echo "ERROR: 1st args provided must be the resource tier (dev / main) to lookup the ip address you have configured in ipaddresses.json"
+fi
+export resourcetier="$1"
+
 openvpn_user="openvpnas"
 read -s -p "openvpn_user_pw: " openvpn_user_pw
 
