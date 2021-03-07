@@ -78,8 +78,6 @@ build {
     ]
   provisioner "shell" {
     inline         = [
-      # "echo \"Public IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output=text)\"",
-      # "echo \"Private IP: $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PrivateIpAddress' --output=text)\"",
       "echo 'Init success.'",
       "sudo echo 'Sudo test success.'",
       "unset HISTFILE",
@@ -114,14 +112,12 @@ build {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     valid_exit_codes = [0,1] # ignore exit code.  this requirement is a bug in the open vpn ami.
     inline         = [
-      # "sudo apt -y install dialog || exit 0" # supressing exit code.
       "sudo apt-get -y install dialog; echo \"exit $?\"" # supressing exit code - until dialog is installed, apt-get may produce non zero exist codes.
     ]
   }
 
   provisioner "shell" {
     inline_shebang = "/bin/bash -e"
-    # only           = ["amazon-ebs.openvpn-server-base-ami"]
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline         = [
       "DEBIAN_FRONTEND=noninteractive sudo apt-get install -y -q; echo \"exit $?\""
@@ -130,7 +126,6 @@ build {
 
   provisioner "shell" {
     inline_shebang = "/bin/bash -e"
-    # only           = ["amazon-ebs.openvpn-server-base-ami"]
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline         = [
       "sudo apt-get -y update",
