@@ -79,14 +79,13 @@ variable "aws_internal_domain" {
 }
 
 variable "test_consul" { # If a consul cluster is running, attempt to join the cluster.
-  type = bool
+  type    = bool
   default = false
 }
 
 locals {
-  timestamp           = regex_replace(timestamp(), "[- TZ:]", "")
-  template_dir        = path.root
-  # openvpn_admin_pw    = vault("/${var.resourcetier}/data/network/openvpn_admin_pw", "value")
+  timestamp    = regex_replace(timestamp(), "[- TZ:]", "")
+  template_dir = path.root
 }
 
 source "amazon-ebs" "openvpn-server-ami" {
@@ -96,12 +95,12 @@ source "amazon-ebs" "openvpn-server-ami" {
   region          = "${var.aws_region}"
   source_ami      = "${var.openvpn_server_base_ami}"
   # We generate a random pass for the image build.  It will never need to be reused.  When the ami is started, the password is reset to a vault provided value.
-  user_data       = <<EOF
+  user_data    = <<EOF
 #! /bin/bash
 admin_user=openvpnas
 admin_pw="$(openssl rand -base64 12)"
 EOF
-  ssh_username    = "openvpnas"
+  ssh_username = "openvpnas"
 
   vpc_id               = "${var.vpc_id}"
   subnet_id            = "${var.subnet_id}"
@@ -109,28 +108,6 @@ EOF
   iam_instance_profile = var.provisioner_iam_profile_name
 }
 
-# source "amazon-ebs" "openvpn-server-ami" { # Open vpn server requires vault and consul, so we build it here as well.
-#   ami_description = "An Open VPN Access Server AMI configured for Firehawk"
-#   ami_name        = "firehawk-openvpn-server-${local.timestamp}-{{uuid}}"
-#   instance_type   = "t2.micro"
-#   region          = "${var.aws_region}"
-#   # user_data = "admin_user=openvpnas; admin_pw=openvpnas"
-#   user_data = <<EOF
-# #! /bin/bash
-# admin_user=openvpnas
-# admin_pw=''
-# EOF
-#   # user_data_file  = "${local.template_dir}/openvpn_user_data.sh"
-#   source_ami_filter {
-#     filters = {
-#       description  = "OpenVPN Access Server 2.8.3 publisher image from https://www.openvpn.net/."
-#       product-code = "f2ew2wrz425a1jagnifd02u5t"
-#     }
-#     most_recent = true
-#     owners      = ["679593333241"]
-#   }
-#   ssh_username = "openvpnas"
-# }
 
 build {
   sources = [
@@ -233,17 +210,6 @@ build {
     # only           = ["amazon-ebs.openvpn-server-ami"]
   }
 
-
-
-  provisioner "file" {
-    destination = "/tmp/sign-request.py"
-    source      = "${local.template_dir}/auth/sign-request.py"
-  }
-  provisioner "file" {
-    destination = "/tmp/ca.crt.pem"
-    source      = "${var.ca_public_key_path}"
-  }
-
   ### This block will install Vault and Consul Agent
 
   provisioner "shell" { # Vault client probably wont be installed on bastions in future, but most hosts that will authenticate will require it.
@@ -275,7 +241,7 @@ build {
       "else",
       " /tmp/terraform-aws-consul/modules/install-consul/install-consul --version ${var.consul_version};",
       "fi"
-      ]
+    ]
   }
 
   provisioner "shell" { # Generate certificates with vault.
@@ -285,16 +251,16 @@ build {
       "set -x; sudo systemctl daemon-reload",
       "set -x; sudo systemctl restart systemd-resolved",
       "set -x; sudo cat /etc/systemd/resolved.conf",
-      "if [[ \"${var.test_consul}\" == true ]]; then", # only test the connection if the var is set.
+      "if [[ \"${var.test_consul}\" == true ]]; then",                                                                                                                 # only test the connection if the var is set.
       " set -x; sudo /opt/consul/bin/run-consul --client --cluster-tag-key \"${var.consul_cluster_tag_key}\" --cluster-tag-value \"${var.consul_cluster_tag_value}\"", # this is normally done with user data but dont for convenience here
       " set -x; consul members list",
-      " set -x; dig $(hostname) | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost resolve's
+      " set -x; dig $(hostname) | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",                     # check localhost resolve's
       " set -x; dig @127.0.0.1 vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check consul will resolve vault
       " set -x; dig @localhost vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'", # check localhost will resolve vault
       " set -x; dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'",            # check default lookup will resolve vault
       "fi",
     ]
-    inline_shebang    = "/bin/bash -e"
+    inline_shebang = "/bin/bash -e"
   }
 
   provisioner "shell" {
