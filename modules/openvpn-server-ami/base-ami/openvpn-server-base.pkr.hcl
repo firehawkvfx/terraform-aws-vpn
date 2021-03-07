@@ -51,9 +51,9 @@ locals {
   template_dir = path.root
 }
 
-source "amazon-ebs" "openvpn-server-base-ami" {
+source "amazon-ebs" "base-openvpn-server-ami" {
   ami_description = "An Open VPN Access Server AMI configured for Firehawk"
-  ami_name        = "firehawk-openvpn-server-base-${local.timestamp}-{{uuid}}"
+  ami_name        = "firehawk-base-openvpn-server-${local.timestamp}-{{uuid}}"
   instance_type   = "t2.micro"
   region          = "${var.aws_region}"
   user_data = <<EOF
@@ -74,7 +74,7 @@ EOF
 
 build {
   sources = [
-    "source.amazon-ebs.openvpn-server-base-ami"
+    "source.amazon-ebs.base-openvpn-server-ami"
     ]
   provisioner "shell" {
     inline         = [
@@ -94,7 +94,7 @@ build {
   
   provisioner "shell" {
     inline_shebang = "/bin/bash -e"
-    # only           = ["amazon-ebs.openvpn-server-base-ami"]
+    # only           = ["amazon-ebs.base-openvpn-server-ami"]
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline         = [
       "export SHOWCOMMANDS=true; set -x",
@@ -108,7 +108,7 @@ build {
 
   provisioner "shell" {
     inline_shebang = "/bin/bash -e"
-    # only           = ["amazon-ebs.openvpn-server-base-ami"]
+    # only           = ["amazon-ebs.base-openvpn-server-ami"]
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     valid_exit_codes = [0,1] # ignore exit code.  this requirement is a bug in the open vpn ami.
     inline         = [

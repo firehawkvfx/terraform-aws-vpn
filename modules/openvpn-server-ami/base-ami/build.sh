@@ -24,5 +24,5 @@ export PKR_VAR_manifest_path="$SCRIPTDIR/manifest.json"
 mkdir -p $SCRIPTDIR/tmp/log
 mkdir -p $SCRIPTDIR/ansible/collections/ansible_collections
 rm -f $PKR_VAR_manifest_path
-packer build "$@" $SCRIPTDIR/openvpn-server-base.pkr.hcl
+packer build "$@" $SCRIPTDIR/base-openvpn-server.pkr.hcl
 cd $EXECDIR
