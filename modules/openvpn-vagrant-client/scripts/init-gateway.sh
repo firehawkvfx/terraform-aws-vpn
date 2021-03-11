@@ -9,7 +9,7 @@ function ctrl_c() {
         exit
 }
 to_abs_path() {
-  python3 -c "import os; print os.path.abspath('$1')"
+  python3 -c "import os; print(os.path.abspath('$1'))"
 }
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

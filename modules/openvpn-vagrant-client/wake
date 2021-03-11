@@ -21,4 +21,5 @@ fi
 
 echo "openvpn_user: $openvpn_user"
 
-openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up; vagrant reload
+openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
+# ; vagrant reload
