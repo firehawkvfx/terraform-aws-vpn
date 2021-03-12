@@ -56,10 +56,6 @@ function retrieve_file {
 
 # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
 
-# retrieve_file "/home/centos/tmp/usr/local/openvpn_as/scripts/seperate/ca.crt"
-# retrieve_file "/home/centos/tmp/usr/local/openvpn_as/scripts/seperate/client.crt"
-# retrieve_file "/home/centos/tmp/usr/local/openvpn_as/scripts/seperate/client.key"
-# retrieve_file "/home/centos/tmp/usr/local/openvpn_as/scripts/seperate/ta.key"
 retrieve_file "/home/centos/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
 
 cp $SCRIPTDIR/../openvpn_config/client.ovpn $SCRIPTDIR/../openvpn_config/openvpn.conf

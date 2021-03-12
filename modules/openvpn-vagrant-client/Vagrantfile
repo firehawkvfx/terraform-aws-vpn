@@ -9,7 +9,10 @@
 
 require 'json'
 
-bridgenic = "en0: Wi-Fi (Wireless)" # eg: 'none' or 'en0: Wi-Fi (AirPort)'
+# bridgenic = "en0: Wi-Fi (Wireless)" # eg: 'none' or 'en0: Wi-Fi (AirPort)'
+bridgenic = "en7: Thunderbolt Ethernet"
+# bridgenic = "none" # use none if you do not know the network connection, you will be prompted.
+
 resourcetier = ENV['resourcetier']
 
 ip_addresses = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'ip_addresses.json')))

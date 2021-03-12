@@ -1,12 +1,36 @@
 #!/bin/bash
 
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+cd "$SCRIPTDIR"
+
 if [[ -z "$1" ]]; then
     echo "ERROR: 1st args provided must be the resource tier (dev / main) to lookup the ip address you have configured in ipaddresses.json"
     exit 1
 fi
-export resourcetier="$1"
 
+
+if [[ -z "$2" ]]; then
+  echo "Error: 2nd arg bastion host must be provided. eg:"
+  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+  exit 1
+fi
+
+if [[ -z "$3" ]]; then
+  echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
+  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+  exit 1
+fi
+
+if [[ -z "$VAULT_TOKEN" ]]; then
+  echo "Provide a vault token to utilise on the private vault client:"
+  read -s -p "VAULT_TOKEN: " VAULT_TOKEN
+fi
+
+export resourcetier="$1"
 echo "resourcetier: $resourcetier"
+host1="$2"
+host2="$3"
 
 openvpn_user="openvpnas"
 
@@ -21,5 +45,6 @@ fi
 
 echo "openvpn_user: $openvpn_user"
 
+VAULT_TOKEN=$VAULT_TOKEN $SCRIPTDIR/scripts/copy_vault_file_from_bastion.sh $resourcetier $host1 $host2
+
 openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
-# ; vagrant reload
