@@ -19,14 +19,6 @@
               regexp="^127\.0\.0\.1.*localhost.*$"
   when: set_hostname is defined and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
 
-# - name: "ensure key exists {{ general_use_ssh_key }}"
-#   openssh_keypair:
-#     path: "{{ general_use_ssh_key }}"
-#     mode: '0600'
-#     owner: deployuser
-#   delegate_to: "{{ delegate_host }}"
-#   become: true
-
 - name: insert/update block in /etc/hosts
   blockinfile:
     path: /etc/hosts
@@ -36,50 +28,9 @@
   with_items:
     - { ip: "{{ openfirehawkserver_ip }}", hostname: "{{ openfirehawkserver_name }}" }
 
-- name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
-  lineinfile:
-    path: /etc/environment
-    line: "ANSIBLE_STDOUT_CALLBACK=debug"
-    create: yes
+# - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
+#   lineinfile:
+#     path: /etc/environment
+#     line: "ANSIBLE_STDOUT_CALLBACK=debug"
+#     create: yes
     
-- name: insert marker start
-  lineinfile:
-    path: /etc/rc.local
-    insertafter: "^#?.By default.*$"
-    line: "# BEGIN ANSIBLE MANAGED BLOCK"
-    backup: yes
-  tags:
-  - init
-
-- name: insert marker end
-  lineinfile:
-    path: /etc/rc.local
-    insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-    line: "# END ANSIBLE MANAGED BLOCK"
-    create: true
-  tags:
-  - init
-
-- name: insert/update block in /etc/rc.local
-  blockinfile:
-    path: /etc/rc.local
-    backup: yes
-    content: |
-      #promiscuous mode required for routing
-      /sbin/ifconfig {{ vpn_nic }} up
-      /sbin/ifconfig {{ vpn_nic }} promisc
-  when: configure_gateway|bool
-  tags:
-  - init
-
-- name: execute and check with netstat
-  shell: |
-    /etc/rc.local
-    netstat -i
-  register: netstatout
-  become: true
-  tags:
-  - init
-
-- debug:
-    msg: "{{ netstatout.stdout }}"

@@ -2,4 +2,3 @@
 # defaults file for roles/init-host
 
 delegate_host: ansible_control
-vpn_nic: eth1

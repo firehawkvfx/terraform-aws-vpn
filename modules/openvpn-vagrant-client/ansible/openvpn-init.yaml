@@ -11,11 +11,52 @@
   vars:
     client_network: None
     client_netmask_bits: None
-
-  roles:
-  # - {role: 'openvpn-gateway', tags: 'init'}
+    vpn_nic: eth1
+    configure_gateway: true
 
   tasks:
+  - name: insert marker start
+    lineinfile:
+      path: /etc/rc.local
+      insertafter: "^#?.By default.*$"
+      line: "# BEGIN ANSIBLE MANAGED BLOCK"
+      backup: yes
+    tags:
+    - init
+
+  - name: insert marker end
+    lineinfile:
+      path: /etc/rc.local
+      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+      line: "# END ANSIBLE MANAGED BLOCK"
+      create: true
+    tags:
+    - init
+
+  - name: insert/update block in /etc/rc.local
+    blockinfile:
+      path: /etc/rc.local
+      backup: yes
+      content: |
+        #promiscuous mode required for routing
+        /sbin/ifconfig {{ vpn_nic }} up
+        /sbin/ifconfig {{ vpn_nic }} promisc
+    when: configure_gateway|bool
+    tags:
+    - init
+
+  - name: execute and check with netstat
+    shell: |
+      /etc/rc.local
+      netstat -i
+    register: netstatout
+    become: true
+    tags:
+    - init
+
+  - debug:
+      msg: "{{ netstatout.stdout }}"
+
   - name: allow ip forwarding, uncomment
     replace:
       path: /etc/sysctl.conf
