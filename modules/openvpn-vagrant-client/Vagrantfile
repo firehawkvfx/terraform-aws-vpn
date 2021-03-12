@@ -143,10 +143,11 @@ Vagrant.configure(2) do |config|
             # node.trigger.after :up do |trigger|
             #     trigger.warn = "Restarted for SSH config service alteration"
             # end
-            
+
             node.vm.provision "shell", inline: "set -x; export openfirehawkserver_name=#{openfirehawkserver_name}; export openfirehawkserver_ip=#{openfirehawkserver_ip} ; /deployuser/scripts/init-gateway.sh --#{resourcetier}"
             node.vm.provision "shell", inline: "sudo reboot"
             node.vm.provision :reload
+            node.vm.provision "shell", inline: "ansible-config dump"
             node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars \"variable_host=localhost openvpn_user=#{ENV['openvpn_user']} openvpn_user_pw=#{ENV['openvpn_user_pw']}\"" #, run: 'always' # Connect vpn always on reload
             node.vm.post_up_message = "Machine is up IP: #{machine[:box]}"
 
