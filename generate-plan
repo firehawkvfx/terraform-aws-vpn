@@ -31,6 +31,19 @@ else
     exit 1
 fi
 
+# AMI query by commit
+ami_role="firehawk_openvpn_server_ami"
+export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami; git rev-parse HEAD)"
+echo "Query AMI for Vault server with commit: $TF_VAR_ami_commit_hash"
+query=$(aws ec2 describe-images --filters "Name=tag:ami_role,Values=$firehawk_centos7_ami" --filters "Name=tag:commit_hash,Values=$TF_VAR_ami_commit_hash" --owners self --region $AWS_DEFAULT_REGION --query 'sort_by(Images, &CreationDate)[].ImageId' --output json | jq '.[0]' --raw-output)
+if [[ "$query" != "null" ]]; then
+    export TF_VAR_openvpn_server_ami="$query"
+    echo "Found openvpn_server_ami with tag matching commit: TF_VAR_openvpn_server_ami=$TF_VAR_openvpn_server_ami"
+fi
+if [[ -z "$TF_VAR_openvpn_server_ami" ]]; then
+  exit_if_error 1 "Images required for deployment are not present.  You will need to build them before continuing."
+fi
+
 terraform init \
     -input=false \
     -backend-config="bucket=state.terraform.$TF_VAR_bucket_extension" \
