@@ -44,10 +44,15 @@ if [[ -z "$TF_VAR_openvpn_server_ami" ]]; then
   exit_if_error 1 "Images required for deployment are not present.  You will need to build them before continuing."
 fi
 
-terraform init \
-    -input=false \
-    -backend-config="bucket=state.terraform.$TF_VAR_bucket_extension" \
-    -backend-config="key=$TF_VAR_resourcetier/terraform-aws-vpn/terraform.tfstate" \
-    -backend-config="region=$AWS_DEFAULT_REGION" \
-    -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
-terraform plan -out=tfplan -input=false
+# If sourced, dont execute
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+echo "Script sourced: $sourced"
+if [[ "$sourced" -eq 0 ]]; then
+    terraform init \
+        -input=false \
+        -backend-config="bucket=state.terraform.$TF_VAR_bucket_extension" \
+        -backend-config="key=$TF_VAR_resourcetier/terraform-aws-vpn/terraform.tfstate" \
+        -backend-config="region=$AWS_DEFAULT_REGION" \
+        -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
+    terraform plan -out=tfplan -input=false
+fi
