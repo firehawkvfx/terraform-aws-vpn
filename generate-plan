@@ -56,3 +56,5 @@ if [[ "$sourced" -eq 0 ]]; then
         -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
     terraform plan -out=tfplan -input=false
 fi
+
+set +e
