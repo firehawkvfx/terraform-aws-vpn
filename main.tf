@@ -161,7 +161,7 @@ module "vpn" {
   public_route_table_ids  = local.public_route_table_ids
 
   # EC2 Inputs
-  aws_key_name = "deployuser-${var.resourcetier}" # This should be replaced with an admin level ssh cert.
+  aws_key_name = var.aws_key_name # This should be replaced with an admin level ssh cert.
   # private_key          = local.private_key
   # aws_private_key_path = var.aws_private_key_path
   instance_type = var.instance_type

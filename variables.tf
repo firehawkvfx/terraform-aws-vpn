@@ -67,3 +67,8 @@ variable "onsite_public_ip" {
   description = "The public ip address of your onsite location to enable access to security groups and openVPN."
   type = string
 }
+
+variable "aws_key_name" {
+  description = "The name of the AWS PEM key for access to the instance"
+  type        = string
+}
