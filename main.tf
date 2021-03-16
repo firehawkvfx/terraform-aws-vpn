@@ -121,6 +121,16 @@ output "public_ip" {
   value = module.vpn.public_ip
 }
 
+data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terraform_remote_state.packer_profile.outputs.instance_role_arn, or read the profile name with data.terraform_remote_state.packer_profile.outputs.instance_profile_name
+  backend = "s3"
+  config = {
+    bucket = "state.terraform.${var.bucket_extension_vault}"
+    key    = "${var.resourcetier_vault}/${var.vpcname_vault}-terraform-aws-iam-profile-openvpn/terraform.tfstate"
+    region = data.aws_region.current.name
+  }
+}
+
+
 module "vpn" {
   source = "./modules/tf_aws_openvpn"
 
@@ -128,6 +138,8 @@ module "vpn" {
 
   # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
   example_role_name = "vpn-server-vault-iam-creds-role" # this authenticates with a dynamically generated secret key
+
+  iam_instance_profile_name = data.terraform_remote_state.openvpn_profile.instance_profile_name
 
   ami = var.openvpn_server_ami
 
