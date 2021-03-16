@@ -139,7 +139,7 @@ module "vpn" {
   # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
   example_role_name = "vpn-server-vault-iam-creds-role" # this authenticates with a dynamically generated secret key
 
-  iam_instance_profile_name = data.terraform_remote_state.openvpn_profile.instance_profile_name
+  iam_instance_profile_name = data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name
 
   ami = var.openvpn_server_ami
 
