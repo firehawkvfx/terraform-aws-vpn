@@ -5,7 +5,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd "$SCRIPTDIR"
 
 if [[ -z "$1" ]]; then
-    echo "ERROR: 1st args provided must be the resource tier (dev / main) to lookup the ip address you have configured in ipaddresses.json"
+    echo "ERROR: 1st args provided must be the resourcetier (dev / main) to lookup the local private ip address to be used.  You have configured this in ip_addresses.json"
     exit 1
 fi
 
