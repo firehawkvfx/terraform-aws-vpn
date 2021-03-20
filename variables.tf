@@ -85,3 +85,8 @@ variable "vpcname_vault" {
     description = "A namespace component defining the location of the terraform remote state"
     type = string
 }
+
+variable "common_tags" {
+  description = "Common tags for all resources in a deployment run."
+  type        = map(string)
+}

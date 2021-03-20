@@ -9,22 +9,9 @@ provider "aws" {
 }
 
 data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
-data "aws_canonical_user_id" "current" {}
 
 locals {
-  common_tags = {
-    environment  = var.environment
-    resourcetier = var.resourcetier
-    conflictkey  = var.conflictkey
-    # The conflict key defines a name space where duplicate resources in different deployments sharing this name are prevented from occuring.  This is used to prevent a new deployment overwriting and existing resource unless it is destroyed first.
-    # examples might be blue, green, dev1, dev2, dev3...dev100.  This allows us to lock deployments on some resources.
-    pipelineid = var.pipelineid
-    owner      = data.aws_canonical_user_id.current.display_name
-    accountid  = data.aws_caller_identity.current.account_id
-    region     = data.aws_region.current.name
-    terraform  = "true"
-  }
+  common_tags = var.common_tags
 }
 
 data "aws_vpc" "primary" {
@@ -38,7 +25,7 @@ data "aws_internet_gateway" "gw" {
 
 data "aws_subnet_ids" "public" {
   vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "public")
+  tags = merge( local.common_tags, { "area" : "public" } )
 }
 
 data "aws_subnet" "public" {
@@ -48,7 +35,7 @@ data "aws_subnet" "public" {
 
 data "aws_subnet_ids" "private" {
   vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "private")
+  tags = merge( local.common_tags, { "area" : "private" } )
 }
 
 data "aws_subnet" "private" {
@@ -58,12 +45,12 @@ data "aws_subnet" "private" {
 
 data "aws_route_tables" "public" {
   vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "public")
+  tags = merge( local.common_tags, { "area" : "public" } )
 }
 
 data "aws_route_tables" "private" {
   vpc_id = data.aws_vpc.primary.id
-  tags   = map("area", "private")
+  tags = merge( local.common_tags, { "area" : "private" } )
 }
 
 data "vault_generic_secret" "private_domain" { # Get the map of data at the path
