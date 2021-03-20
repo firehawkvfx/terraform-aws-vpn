@@ -4,3 +4,4 @@ modules/secrets/*
 modules/openvpn-vagrant-client/openvpn_config/*
 # plan files are temporary
 **/tfplan
+.terraform/
