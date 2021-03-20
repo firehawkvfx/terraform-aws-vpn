@@ -132,33 +132,16 @@ data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terra
 
 
 module "vpn" {
-  source = "./modules/tf_aws_openvpn"
-
+  source     = "./modules/tf_aws_openvpn"
   create_vpn = true
 
   # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
-  example_role_name = "vpn-server-vault-iam-creds-role" # this authenticates with a dynamically generated secret key
-
+  example_role_name         = "vpn-server-vault-iam-creds-role" # this authenticates with a dynamically generated secret key
+  name                      = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
+  ami                       = var.openvpn_server_ami
   iam_instance_profile_name = data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name
-
-  ami = var.openvpn_server_ami
-
-  consul_cluster_name    = var.consul_cluster_name
-  consul_cluster_tag_key = var.consul_cluster_tag_key
-
-  route_public_domain_name = var.route_public_domain_name
-
-  igw_id = local.aws_internet_gateway
-
-  public_subnets  = local.public_subnet_cidr_blocks
-  private_subnets = local.private_subnet_cidr_blocks
-
-  name = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
-
-  private_domain_name = local.private_domain
-
-  resourcetier = var.resourcetier
-  conflictkey  = var.conflictkey
+  resourcetier              = var.resourcetier
+  conflictkey               = var.conflictkey
 
   # VPC Inputs
   vpc_id                     = local.vpc_id
@@ -168,9 +151,12 @@ module "vpn" {
   remote_vpn_ip_cidr         = "${local.onsite_public_ip}/32"
   remote_ssh_ip_cidr         = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
   onsite_private_subnet_cidr = local.onsite_private_subnet_cidr
-
-  private_route_table_ids = local.private_route_table_ids
-  public_route_table_ids  = local.public_route_table_ids
+  private_route_table_ids    = local.private_route_table_ids
+  public_route_table_ids     = local.public_route_table_ids
+  route_public_domain_name   = var.route_public_domain_name
+  igw_id                     = local.aws_internet_gateway
+  public_subnets             = local.public_subnet_cidr_blocks
+  private_subnets            = local.private_subnet_cidr_blocks
 
   # EC2 Inputs
   aws_key_name = var.aws_key_name # This should be replaced with an admin level ssh cert.
@@ -182,8 +168,11 @@ module "vpn" {
   source_dest_check = false
 
   # DNS Inputs
-  public_domain_name = local.public_domain_name
-  route_zone_id      = local.route_zone_id
+  consul_cluster_name    = var.consul_cluster_name
+  consul_cluster_tag_key = var.consul_cluster_tag_key
+  public_domain_name     = local.public_domain_name
+  private_domain_name    = local.private_domain
+  route_zone_id          = local.route_zone_id
 
   # # OpenVPN Inputs
   openvpn_user       = "openvpnas"
