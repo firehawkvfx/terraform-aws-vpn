@@ -112,11 +112,10 @@ data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terra
   backend = "s3"
   config = {
     bucket = "state.terraform.${var.bucket_extension_vault}"
-    key    = "${var.resourcetier_vault}/${var.vpcname_vault}-terraform-aws-iam-profile-openvpn/terraform.tfstate"
+    key    = "firehawk-main/modules/terraform-aws-iam-profile-openvpn/terraform.tfstate"
     region = data.aws_region.current.name
   }
 }
-
 
 module "vpn" {
   source     = "./modules/tf_aws_openvpn"
