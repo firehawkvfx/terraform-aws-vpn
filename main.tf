@@ -123,7 +123,7 @@ module "vpn" {
 
   # example_role_name = "vpn-server-vault-role" # this is to authenticate with the profile
   example_role_name         = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
-  name                      = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
+  name                      = "${lookup(local.common_tags, "vpcname", "default")}_openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
   ami                       = var.openvpn_server_ami
   iam_instance_profile_name = data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name
   resourcetier              = var.resourcetier
