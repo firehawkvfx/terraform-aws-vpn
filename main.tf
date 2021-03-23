@@ -108,15 +108,15 @@ data "terraform_remote_state" "vpn_security_group" { # read the arn with data.te
 }
 
 module "vpn" {
-  source     = "./modules/tf_aws_openvpn"
-  create_vpn = true
-  security_group_attachments = data.terraform_remote_state.vpn_security_group.outputs.security_group_id
-  example_role_name         = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
-  name                      = local.instance_name
-  ami                       = var.openvpn_server_ami
-  iam_instance_profile_name = data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name
-  resourcetier              = var.resourcetier
-  conflictkey               = var.conflictkey
+  source                     = "./modules/tf_aws_openvpn"
+  create_vpn                 = true
+  security_group_attachments = [data.terraform_remote_state.vpn_security_group.outputs.security_group_id]
+  example_role_name          = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
+  name                       = local.instance_name
+  ami                        = var.openvpn_server_ami
+  iam_instance_profile_name  = data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name
+  resourcetier               = var.resourcetier
+  conflictkey                = var.conflictkey
   # VPC Inputs
   vpc_id                     = local.vpc_id
   vpc_cidr                   = local.vpc_cidr
