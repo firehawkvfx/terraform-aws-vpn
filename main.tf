@@ -98,10 +98,19 @@ data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terra
     region = data.aws_region.current.name
   }
 }
+data "terraform_remote_state" "vpn_security_group" { # read the arn with data.terraform_remote_state.packer_profile.outputs.instance_role_arn, or read the profile name with data.terraform_remote_state.packer_profile.outputs.instance_profile_name
+  backend = "s3"
+  config = {
+    bucket = "state.terraform.${var.bucket_extension_vault}"
+    key    = "firehawk-main/modules/terraform-aws-sg-vpn/terraform.tfstate"
+    region = data.aws_region.current.name
+  }
+}
 
 module "vpn" {
-  source                    = "./modules/tf_aws_openvpn"
-  create_vpn                = true
+  source     = "./modules/tf_aws_openvpn"
+  create_vpn = true
+  security_group_attachments = data.terraform_remote_state.vpn_security_group.outputs.security_group_id
   example_role_name         = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
   name                      = local.instance_name
   ami                       = var.openvpn_server_ami
