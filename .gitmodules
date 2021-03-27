@@ -3,4 +3,4 @@
 	url = ../tf_aws_openvpn
 [submodule "modules/openvpn-client"]
 	path = modules/openvpn-client
-	url = git@github.com:firehawkvfx/openvpn-client.git
+	url = ../openvpn-client.git
