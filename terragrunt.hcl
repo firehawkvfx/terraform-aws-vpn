@@ -11,7 +11,7 @@ inputs = local.common_vars.inputs
 dependencies {
   paths = [
     "../vault",
-    "../vault-configuration",
+    # "../vault-configuration",
     "../terraform-aws-sg-vpn"
     ]
 }
