@@ -65,7 +65,7 @@ retry \
 echo "Aquiring vault data..."
 # data=$(vault kv get -format=json /${resourcetier}/files/usr/local/openvpn_as/scripts/seperate/ca.crt)
 
-function retrieve_file {
+function retrieve_json_blob {
   local -r source_path="$1"
   if [[ -z "$2" ]]; then
     local -r target_path="$source_path"
@@ -92,10 +92,6 @@ function retrieve_file {
 
 # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
 
-# retrieve_file "/usr/local/openvpn_as/scripts/seperate/ca.crt" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/ca.crt"
-# retrieve_file "/usr/local/openvpn_as/scripts/seperate/client.crt" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.crt"
-# retrieve_file "/usr/local/openvpn_as/scripts/seperate/client.key" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.key"
-# retrieve_file "/usr/local/openvpn_as/scripts/seperate/ta.key" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/ta.key"
-retrieve_file "/usr/local/openvpn_as/scripts/seperate/client.ovpn" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
+retrieve_json_blob "/usr/local/openvpn_as/scripts/seperate/client.ovpn" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
 
 echo "Done."
