@@ -122,7 +122,7 @@ module "vpn" {
   consul_cluster_tag_key = var.consul_cluster_tag_key
   public_domain_name     = local.public_domain_name
   # private_domain_name    = local.private_domain # removed this becuase of ref to vault secret - cannot destroy.
-  private_domain_name = "consul"
+  # private_domain_name = "consul"
   route_zone_id          = local.route_zone_id
   # # OpenVPN Inputs
   openvpn_user       = "openvpnas"
