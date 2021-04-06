@@ -53,22 +53,6 @@ data "aws_route_tables" "private" {
   tags   = merge(local.common_tags, { "area" : "private" })
 }
 
-# data "vault_generic_secret" "private_domain" { # Get the map of data at the path
-#   path = "${local.mount_path}/network/private_domain"
-# }
-
-# data "vault_generic_secret" "vpn_cidr" { # Get the map of data at the path
-#   path = "${local.mount_path}/network/vpn_cidr"
-# }
-
-# data "vault_generic_secret" "onsite_private_subnet_cidr" { # Get the map of data at the path
-#   path = "${local.mount_path}/network/onsite_private_subnet_cidr"
-# }
-
-# data "vault_generic_secret" "onsite_public_ip" { # Get the map of data at the path
-#   path = "${local.mount_path}/network/onsite_public_ip"
-# }
-
 locals {
   mount_path                 = var.resourcetier
   vpc_id                     = data.aws_vpc.primary.id
@@ -78,7 +62,6 @@ locals {
   public_subnet_cidr_blocks  = [for s in data.aws_subnet.public : s.cidr_block]
   private_subnets            = sort(data.aws_subnet_ids.private.ids)
   private_subnet_cidr_blocks = [for s in data.aws_subnet.private : s.cidr_block]
-  # private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
   vpn_cidr                   = var.vpn_cidr
   onsite_private_subnet_cidr = var.onsite_private_subnet_cidr
   onsite_public_ip           = var.onsite_public_ip
@@ -87,8 +70,6 @@ locals {
   public_domain_name         = "none"
   route_zone_id              = "none"
   instance_name              = "${lookup(local.common_tags, "vpcname", "default")}_openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
-  # openvpn_user_pw            = lookup(data.vault_generic_secret.openvpn_user_pw.data, "value")
-  # openvpn_admin_pw           = lookup(data.vault_generic_secret.openvpn_admin_pw.data, "value")
 }
 data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terraform_remote_state.packer_profile.outputs.instance_role_arn, or read the profile name with data.terraform_remote_state.packer_profile.outputs.instance_profile_name
   backend = "s3"
