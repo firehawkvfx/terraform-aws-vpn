@@ -53,9 +53,9 @@ data "aws_route_tables" "private" {
   tags   = merge(local.common_tags, { "area" : "private" })
 }
 
-data "vault_generic_secret" "private_domain" { # Get the map of data at the path
-  path = "${local.mount_path}/network/private_domain"
-}
+# data "vault_generic_secret" "private_domain" { # Get the map of data at the path
+#   path = "${local.mount_path}/network/private_domain"
+# }
 
 # data "vault_generic_secret" "vpn_cidr" { # Get the map of data at the path
 #   path = "${local.mount_path}/network/vpn_cidr"
@@ -78,7 +78,7 @@ locals {
   public_subnet_cidr_blocks  = [for s in data.aws_subnet.public : s.cidr_block]
   private_subnets            = sort(data.aws_subnet_ids.private.ids)
   private_subnet_cidr_blocks = [for s in data.aws_subnet.private : s.cidr_block]
-  private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
+  # private_domain             = lookup(data.vault_generic_secret.private_domain.data, "value")
   vpn_cidr                   = var.vpn_cidr
   onsite_private_subnet_cidr = var.onsite_private_subnet_cidr
   onsite_public_ip           = var.onsite_public_ip
@@ -140,7 +140,8 @@ module "vpn" {
   consul_cluster_name    = var.consul_cluster_name
   consul_cluster_tag_key = var.consul_cluster_tag_key
   public_domain_name     = local.public_domain_name
-  private_domain_name    = local.private_domain
+  # private_domain_name    = local.private_domain # removed this becuase of ref to vault secret - cannot destroy.
+  private_domain_name = "consul"
   route_zone_id          = local.route_zone_id
   # # OpenVPN Inputs
   openvpn_user       = "openvpnas"
