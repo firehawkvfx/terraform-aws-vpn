@@ -33,6 +33,7 @@ fi
 resourcetier="$1"
 host1="$2"
 host2="$3"
+bastion_user="$(echo \"$host2\" | awk -F '@' '{print $1}')"
 
 # Log the given message. All logs are written to stderr with a timestamp.
 function log {
@@ -41,16 +42,20 @@ function log {
  >&2 echo -e "$timestamp $message"
 }
 
+source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
+source_vault_path="$resourcetier/vpn/client_cert_files$client_cert_file_path" # the full namespace / path to the file in vault.
+target_path="$SCRIPTDIR/../openvpn_config/$(basename $source_file_path)"
+
 log "Requesting files from vault to client in private subnet"
-ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "VAULT_TOKEN=$VAULT_TOKEN bash -s" < ./request_vault_file.sh $resourcetier
+ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "VAULT_TOKEN=$VAULT_TOKEN bash -s" < ./request_vault_file.sh "$source_file_path" "$source_vault_path"
 
 function retrieve_file {
-  local -r source_path="$1"
+  local -r source_path="/home/$bastion_user/tmp$1"
   local -r target_path="$SCRIPTDIR/../openvpn_config/$(basename $source_path)"
 
   scp -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -o ProxyCommand="ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -W %h:%p $host1" $host2:$source_path "$target_path"
   chmod 0600 "$target_path"
-  
+
   [[ -s "$target_path" ]] && exit_status=0 || exit_status=1
   if [[ $exit_status -eq 1 ]]; then
     echo "Error retrieving file"
@@ -62,12 +67,12 @@ function retrieve_file {
 
 # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
 
-retrieve_file "/home/centos/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
+retrieve_file "$source_file_path"
 
 cp $SCRIPTDIR/../openvpn_config/client.ovpn $SCRIPTDIR/../openvpn_config/openvpn.conf
 
 log "...Cleaning up"
-ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "sudo rm -frv /home/centos/tmp/*"
+ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "sudo rm -frv /home/$bastion_user/tmp/*"
 
 echo "Done."
 cd "$EXECDIR"

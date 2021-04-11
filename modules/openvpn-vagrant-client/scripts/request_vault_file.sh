@@ -8,7 +8,8 @@ if [[ -z "$1" ]]; then
   exit 1
 fi
 
-resourcetier="$1"
+source_file_path="$1"
+source_vault_path="$2"
 attempts=1
 
 # Log the given message. All logs are written to stderr with a timestamp.
@@ -56,20 +57,6 @@ retry \
 
 echo "Aquiring vault data..."
 
-# function retrieve_json_blob {
-#   local -r source_path="$1"
-#   if [[ -z "$2" ]]; then
-#     local -r target_path="$source_path"
-#   else
-#     local -r target_path="$2"
-#   fi
-#   local -r response=$(retry \
-#   "vault kv get -format=json /$resourcetier/vpn/client_cert_files/$source_path" \
-#   "Trying to read secret from vault")
-#   sudo mkdir -p $(dirname $target_path) # ensure the directory exists
-#   echo $response | jq -r .data.data | sudo tee $target_path # retrieve full json blob to later pass permissions if required.
-# }
-
 # # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
 # retrieve_json_blob "/usr/local/openvpn_as/scripts/seperate/client.ovpn" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
 
@@ -111,9 +98,6 @@ function retrieve_file {
   echo "retrival done."
 }
 
-client_cert_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn"
-client_cert_vault_path="$resourcetier/vpn/client_cert_files$client_cert_file_path"
-
-retrieve_file "$client_cert_vault_path" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
+retrieve_file "$source_vault_path" "$HOME/tmp$source_file_path"
 
 echo "Done."
