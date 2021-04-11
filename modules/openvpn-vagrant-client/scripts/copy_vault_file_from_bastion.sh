@@ -48,10 +48,17 @@ function retrieve_file {
   local -r source_path="$1"
   local -r target_path="$SCRIPTDIR/../openvpn_config/$(basename $source_path)"
 
-  scp -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -o ProxyCommand="ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -W %h:%p $host1" $host2:$source_path ./json_blob.json
-  jq -r .file json_blob.json | tee $target_path
-  rm ./json_blob.json
-  chmod 0600 $target_path
+  scp -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -o ProxyCommand="ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -W %h:%p $host1" $host2:$source_path "$target_path"
+  # jq -r .file json_blob.json | tee $target_path
+  # rm ./json_blob.json
+  chmod 0600 "$target_path"
+  [[ -s "$target_path" ]] && exit_status=0 || exit_status=1
+  if [[ $exit_status -eq 1 ]]; then
+    echo "Error retrieving file"
+    exit 1
+  else 
+    echo "Success"
+  fi
 }
 
 # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
