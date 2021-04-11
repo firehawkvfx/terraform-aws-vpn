@@ -79,20 +79,12 @@ data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terra
     region = data.aws_region.current.name
   }
 }
-# data "terraform_remote_state" "vpn_security_group" { # read the arn with data.terraform_remote_state.packer_profile.outputs.instance_role_arn, or read the profile name with data.terraform_remote_state.packer_profile.outputs.instance_profile_name
-#   backend = "s3"
-#   config = {
-#     bucket = "state.terraform.${var.bucket_extension_vault}"
-#     key    = "firehawk-main/modules/terraform-aws-sg-vpn/terraform.tfstate"
-#     region = data.aws_region.current.name
-#   }
-# }
 data "aws_security_group" "vpn_security_group" { # Aquire the security group ID for external bastion hosts, these will require SSH access to this internal host.  Since multiple deployments may exist, the pipelineid allows us to distinguish between unique deployments.
   tags = merge( local.common_tags, tomap( {
     "role": "vpn",
     "route": "public"
   } ) )
-  name = "${lookup(local.common_tags, "vpcname", "default")}_openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
+  name = "${lookup(local.common_tags, "vpcname", "default")}_openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}" # name is important to use since tags cannot be controlled - names must be unique, so if it was already taken there would be an error.
   vpc_id = data.aws_vpc.primary.id
 }
 
