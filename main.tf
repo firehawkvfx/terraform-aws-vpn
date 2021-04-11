@@ -102,6 +102,7 @@ module "vpn" {
   vpc_id                     = local.vpc_id
   vpc_cidr                   = local.vpc_cidr
   vpn_cidr                   = local.vpn_cidr
+  combined_vpcs_cidr         = var.combined_vpcs_cidr
   public_subnet_ids          = local.public_subnets
   remote_vpn_ip_cidr         = "${local.onsite_public_ip}/32"
   remote_ssh_ip_cidr         = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
@@ -123,7 +124,7 @@ module "vpn" {
   public_domain_name     = local.public_domain_name
   # private_domain_name    = local.private_domain # removed this becuase of ref to vault secret - cannot destroy.
   # private_domain_name = "consul"
-  route_zone_id          = local.route_zone_id
+  route_zone_id = local.route_zone_id
   # # OpenVPN Inputs
   openvpn_user       = "openvpnas"
   openvpn_admin_user = "openvpnas"
