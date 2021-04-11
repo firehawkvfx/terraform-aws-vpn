@@ -54,44 +54,66 @@ retry \
   "vault login  --no-print $VAULT_TOKEN" \
   "Waiting for Vault login"
 
-# vault login -method=aws header_value=vault.example.com role=dev-role-iam \
-#         aws_access_key_id=<access_key> \
-#         aws_secret_access_key=<secret_key>
-
-# # We can then use the client token from the login output once login was successful
-# token=$(cat /opt/vault/data/vault-token)
-
-# /opt/vault/bin/vault read secret/example_gruntwork
 echo "Aquiring vault data..."
-# data=$(vault kv get -format=json /${resourcetier}/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/ca.crt)
 
-function retrieve_json_blob {
+# function retrieve_json_blob {
+#   local -r source_path="$1"
+#   if [[ -z "$2" ]]; then
+#     local -r target_path="$source_path"
+#   else
+#     local -r target_path="$2"
+#   fi
+#   local -r response=$(retry \
+#   "vault kv get -format=json /$resourcetier/vpn/client_cert_files/$source_path" \
+#   "Trying to read secret from vault")
+#   sudo mkdir -p $(dirname $target_path) # ensure the directory exists
+#   echo $response | jq -r .data.data | sudo tee $target_path # retrieve full json blob to later pass permissions if required.
+# }
+
+# # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
+# retrieve_json_blob "/usr/local/openvpn_as/scripts/seperate/client.ovpn" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
+
+function retrieve_file {
   local -r source_path="$1"
   if [[ -z "$2" ]]; then
     local -r target_path="$source_path"
   else
     local -r target_path="$2"
   fi
-  # target_path=/usr/local/openvpn_as/scripts/seperate/ca.crt
-  # vault kv get -format=json /${resourcetier}/vpn/client_cert_files/$target_path > /usr/local/openvpn_as/scripts/seperate/ca_test.crt
-
-  local -r response=$(retry \
-  "vault kv get -format=json /$resourcetier/vpn/client_cert_files/$source_path" \
+  echo "Aquiring vault data... $source_path to $target_path"
+  response=$(retry \
+  "vault kv get -field=value $source_path/file" \
   "Trying to read secret from vault")
-  sudo mkdir -p $(dirname $target_path) # ensure the directory exists
-  echo $response | jq -r .data.data | sudo tee $target_path # retrieve full json blob to later pass permissions if required.
-  # skipping permissions
-  # local -r permissions=$(echo $response | jq -r .data.data.permissions)
-  # local -r uid=$(echo $response | jq -r .data.data.uid)
-  # local -r gid=$(echo $response | jq -r .data.data.gid)
-  # echo "Setting:"
-  # echo "uid:$uid gid:$gid permissions:$permissions target_path:$target_path"
-  # sudo chown $uid:$gid $target_path
-  # sudo chmod $permissions $target_path
+  echo "$response"
+  echo "mkdir: $(dirname $target_path)"
+  mkdir -p "$(dirname $target_path)" # ensure the directory exists
+  echo "Check file path is writable: $target_path"
+  if test -f "$target_path"; then
+    echo "File exists: ensuring it is writeable"
+    chmod u+w "$target_path"
+    touch "$target_path"
+  else
+    echo "Ensuring path is writeable"
+    touch "$target_path"
+    chmod u+w "$target_path"
+  fi
+  if [[ -f "$target_path" ]]; then
+    chmod u+w "$target_path"
+  else
+    echo "Error: path does not exist, var may not be a file: $target_path "
+  fi
+  echo "Write file content: single operation"
+  echo "$response" | base64 --decode > $target_path
+  if [[ ! -f "$target_path" ]] || [[ -z "$(cat $target_path)" ]]; then
+    echo "Error: no file or empty result at $target_path"
+    exit 1
+  fi
+  echo "retrival done."
 }
 
-# Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
+client_cert_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn"
+client_cert_vault_path="$resourcetier/vpn/client_cert_files$client_cert_file_path"
 
-retrieve_json_blob "/usr/local/openvpn_as/scripts/seperate/client.ovpn" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
+retrieve_file "$client_cert_vault_path" "$HOME/tmp/usr/local/openvpn_as/scripts/seperate/client.ovpn"
 
 echo "Done."
