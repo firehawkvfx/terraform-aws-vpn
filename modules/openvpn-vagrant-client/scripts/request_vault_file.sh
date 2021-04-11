@@ -63,7 +63,7 @@ retry \
 
 # /opt/vault/bin/vault read secret/example_gruntwork
 echo "Aquiring vault data..."
-# data=$(vault kv get -format=json /${resourcetier}/files/usr/local/openvpn_as/scripts/seperate/ca.crt)
+# data=$(vault kv get -format=json /${resourcetier}/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/ca.crt)
 
 function retrieve_json_blob {
   local -r source_path="$1"
@@ -73,10 +73,10 @@ function retrieve_json_blob {
     local -r target_path="$2"
   fi
   # target_path=/usr/local/openvpn_as/scripts/seperate/ca.crt
-  # vault kv get -format=json /${resourcetier}/files/$target_path > /usr/local/openvpn_as/scripts/seperate/ca_test.crt
+  # vault kv get -format=json /${resourcetier}/vpn/client_cert_files/$target_path > /usr/local/openvpn_as/scripts/seperate/ca_test.crt
 
   local -r response=$(retry \
-  "vault kv get -format=json /$resourcetier/files/$source_path" \
+  "vault kv get -format=json /$resourcetier/vpn/client_cert_files/$source_path" \
   "Trying to read secret from vault")
   sudo mkdir -p $(dirname $target_path) # ensure the directory exists
   echo $response | jq -r .data.data | sudo tee $target_path # retrieve full json blob to later pass permissions if required.
