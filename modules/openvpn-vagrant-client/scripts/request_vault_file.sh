@@ -48,12 +48,6 @@ function retry {
 # export VAULT_TOKEN=${vault_token}
 export VAULT_ADDR=https://vault.service.consul:8200
 
-# Retry and wait for the Vault Agent to write the token out to a file.  This could be
-# because the Vault server is still booting and unsealing, or because run-consul
-# running on the background didn't finish yet
-retry \
-  "vault login  --no-print $VAULT_TOKEN" \
-  "Waiting for Vault login"
 
 echo "Aquiring vault data..."
 
@@ -69,9 +63,15 @@ function retrieve_file {
   fi
   echo "Aquiring vault data... $source_path to $target_path"
   response=$(retry \
-  "vault kv get -field=value $source_path/file" \
+  "curl --header 'X-Vault-Token: $VAULT_TOKEN' https://vault.service.consul:8200/v1/$source_path/file" \
   "Trying to read secret from vault")
-  echo "$response"
+  
+  errors=$(echo "$response" | jq -r '.errors | length')
+  if [[ ! $errors -eq 0 ]]; then
+    echo "Vault request failed: $response"
+    exit 1
+  fi
+  
   echo "mkdir: $(dirname $target_path)"
   mkdir -p "$(dirname $target_path)" # ensure the directory exists
   echo "Check file path is writable: $target_path"
@@ -90,14 +90,12 @@ function retrieve_file {
     echo "Error: path does not exist, var may not be a file: $target_path "
   fi
   echo "Write file content: single operation"
-  echo "$response" | base64 --decode > $target_path
+  echo "$response" | jq -r '.data.data.value' | base64 --decode > $target_path
   if [[ ! -f "$target_path" ]] || [[ -z "$(cat $target_path)" ]]; then
     echo "Error: no file or empty result at $target_path"
     exit 1
   fi
-  echo "retrival done."
+  echo "Request Complete."
 }
 
 retrieve_file "$source_vault_path" "$HOME/tmp$source_file_path"
-
-echo "Done."

@@ -1,0 +1,198 @@
+#!/bin/bash
+# This script aquires needed vpn client files from vault to an intermediary bastion
+
+set -e
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+# cd "$SCRIPTDIR"
+
+# if [[ -z "$1" ]]; then
+#   echo "Error: 1st resourcetier must be provided. eg: dev / main / green / blue"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
+
+# if [[ -z "$2" ]]; then
+#   echo "Error: 2nd arg bastion host must be provided. eg:"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
+
+# if [[ -z "$3" ]]; then
+#   echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
+
+# resourcetier="$1"
+# host1="$2"
+# host2="$3"
+
+function print_usage {
+  echo
+  echo "Usage: install-vault [OPTIONS]"
+  echo
+  echo "This script can be used to install Vault and its dependencies. This script has been tested with Ubuntu 16.04, Ubuntu 18.04 and Amazon Linux 2."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --resourcetier\t\tThe environment the data resides in."
+  echo -e "  --host1\t\tThe 'user@hostname' required to SSH to the jump box/bastion host."
+  echo -e "  --host2\t\tThe 'user@hostname' required to SSH to the vault client/private host."
+  echo -e "  --source-file-path\t\tThe original source file full path that would have been used to push the file to vault."
+  echo -e "  --source-vault-path\t\tThe full vault path to the location of the file data in vault."
+  echo -e "  --target-path\t\tThe final location you would like the file to reside."
+  echo -e "  --vault-token\t\tThe vault token that will be utilised on the vault client to retrieve the data."
+  echo
+  echo "Example:"
+  echo
+  echo "  get-vault-file --resourcetier dev --host1 centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com --host2 centos@i-0df3060971160cdd6.node.consul --source-file-path /usr/local/openvpn_as/scripts/seperate/client.ovpn --source-vault-path $resourcetier/data/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/client.ovpn --target-path ../openvpn_config/client.ovpn --vault-token 34hgkj323r2wgsg"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+# # Log the given message. All logs are written to stderr with a timestamp.
+# function log {
+#  local -r message="$1"
+#  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+#  >&2 echo -e "$timestamp $message"
+# }
+
+function retrieve_file {
+  local -r source_path="/home/$bastion_user/tmp$1"
+  local -r target_path="$2"
+
+  echo "Copy: $source_path to localhost: $target_path"
+
+  scp -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -o ProxyCommand="ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -W %h:%p $host1" $host2:$source_path "$target_path"
+  chmod 0600 "$target_path"
+
+  [[ -s "$target_path" ]] && exit_status=0 || exit_status=1
+  if [[ $exit_status -eq 1 ]]; then
+    echo "Error retrieving file"
+    exit 1
+  else 
+    echo "Success"
+  fi
+}
+
+function getfile {
+  local version=""
+  local download_url=""
+  local path="$DEFAULT_INSTALL_PATH"
+  local user="$DEFAULT_VAULT_USER"
+
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --resourcetier)
+        resourcetier="$2"
+        shift
+        ;;
+      --host1)
+        host1="$2"
+        shift
+        ;;
+      --host2)
+        host2="$2"
+        shift
+        ;;
+      --source-file-path)
+        source_file_path="$2"
+        shift
+        ;;
+      --source-vault-path)
+        source_vault_path="$2"
+        shift
+        ;;
+      --target-path)
+        target_path="$2"
+        shift
+        ;;
+      --vault-token)
+        VAULT_TOKEN="$2"
+        shift
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  assert_not_empty "--resourcetier" "$resourcetier"
+  assert_not_empty "--host1" "$host1"
+  assert_not_empty "--host2" "$host2"
+  assert_not_empty "--source-file-path" "$source_file_path"
+  assert_not_empty "--source-vault-path" "$source_vault_path"
+  assert_not_empty "--target-path" "$target_path"
+
+  if [[ -z "$VAULT_TOKEN" ]]; then
+    echo "Provide a vault token to utilise on the private vault client:"
+    read -s -p "VAULT_TOKEN: " VAULT_TOKEN
+  fi
+
+  bastion_user="$(echo $host2 | awk -F '@' '{print $1}')"
+
+  log_info "Aquiring file from Vault"
+
+  log "Requesting files from vault to client in private subnet"
+  ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "VAULT_TOKEN=$VAULT_TOKEN bash -s" < $SCRIPTDIR/request_vault_file.sh "$source_file_path" "$source_vault_path"
+  
+  # Retrieve previously generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
+  retrieve_file "$source_file_path" "$target_path"
+  # Clean up
+  log "...Cleaning up"
+  ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "sudo rm -frv /home/$bastion_user/tmp/*"
+
+  if test -f $target_path; then
+    log_info "File aquired!"
+    # cd "$EXECDIR"
+  else
+    log_info "Could not aquire data. Aborting.";
+    # cd "$EXECDIR"
+    exit 1;
+  fi
+}
+
+getfile "$@"
