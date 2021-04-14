@@ -57,6 +57,8 @@ source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the orig
 source_vault_path="$resourcetier/data/vpn/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
 target_path="$SCRIPTDIR/openvpn_config/$(basename $source_file_path)"
 
+rm -f $SCRIPTDIR/openvpn_config/client.ovpn
+rm -f $SCRIPTDIR/openvpn_config/openvpn.conf
 # $SCRIPTDIR/scripts/get-vault-file --resourcetier $resourcetier --host1 $host1 --host2 $host2 --source-file-path $source_file_path --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
 $SCRIPTDIR/scripts/get-vault-file --resourcetier $resourcetier --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
 

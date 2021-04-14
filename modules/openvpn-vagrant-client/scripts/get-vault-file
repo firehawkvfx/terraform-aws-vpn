@@ -158,7 +158,7 @@ function get_file_stdout() { # uses stdout to retrieve vault data, avoiding the 
   else
     echo "Error: path does not exist, var may not be a file: $target_path "
   fi
-  echo "Write file content: single operation"
+  echo "Write file content from stdout..."
   echo "$response" | jq -r '.data.data.value' | base64 --decode > $target_path
   if [[ ! -f "$target_path" ]] || [[ -z "$(cat $target_path)" ]]; then
     echo "Error: no file or empty result at $target_path"
