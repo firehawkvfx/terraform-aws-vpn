@@ -5,29 +5,6 @@ set -e
 
 EXECDIR="$(pwd)"
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
-# cd "$SCRIPTDIR"
-
-# if [[ -z "$1" ]]; then
-#   echo "Error: 1st resourcetier must be provided. eg: dev / main / green / blue"
-#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
-#   exit 1
-# fi
-
-# if [[ -z "$2" ]]; then
-#   echo "Error: 2nd arg bastion host must be provided. eg:"
-#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
-#   exit 1
-# fi
-
-# if [[ -z "$3" ]]; then
-#   echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
-#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
-#   exit 1
-# fi
-
-# resourcetier="$1"
-# host1="$2"
-# host2="$3"
 
 function print_usage {
   echo
@@ -37,17 +14,15 @@ function print_usage {
   echo
   echo "Options:"
   echo
-  echo -e "  --resourcetier\t\tThe environment the data resides in."
   echo -e "  --host1\t\tThe 'user@hostname' required to SSH to the jump box/bastion host."
   echo -e "  --host2\t\tThe 'user@hostname' required to SSH to the vault client/private host."
-  echo -e "  --source-file-path\t\tThe original source file full path that would have been used to push the file to vault."
   echo -e "  --source-vault-path\t\tThe full vault path to the location of the file data in vault."
   echo -e "  --target-path\t\tThe final location you would like the file to reside."
   echo -e "  --vault-token\t\tThe vault token that will be utilised on the vault client to retrieve the data."
   echo
   echo "Example:"
   echo
-  echo "  get-vault-file --resourcetier dev --host1 centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com --host2 centos@i-0df3060971160cdd6.node.consul --source-file-path /usr/local/openvpn_as/scripts/seperate/client.ovpn --source-vault-path $resourcetier/data/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/client.ovpn --target-path ../openvpn_config/client.ovpn --vault-token 34hgkj323r2wgsg"
+  echo "  get-vault-file --host1 centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com --host2 centos@i-0df3060971160cdd6.node.consul --source-vault-path dev/data/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/client.ovpn --target-path ../openvpn_config/client.ovpn --vault-token 34hgkj323r2wgsg"
 }
 
 function log {
@@ -159,7 +134,7 @@ function get_file_stdout() { # uses stdout to retrieve vault data, avoiding the 
   else
     echo "Error: path does not exist, var may not be a file: $target_path "
   fi
-  
+
   echo "Write file content from stdout..."
   echo "$response" | jq -r '.data.data.value' | base64 --decode > $target_path
   if [[ ! -f "$target_path" ]] || [[ -z "$(cat $target_path)" ]]; then
@@ -179,10 +154,6 @@ function getfile {
     local key="$1"
 
     case "$key" in
-      --resourcetier)
-        resourcetier="$2"
-        shift
-        ;;
       --host1)
         host1="$2"
         shift
@@ -221,10 +192,8 @@ function getfile {
     shift
   done
 
-  assert_not_empty "--resourcetier" "$resourcetier"
   assert_not_empty "--host1" "$host1"
   assert_not_empty "--host2" "$host2"
-  # assert_not_empty "--source-file-path" "$source_file_path"
   assert_not_empty "--source-vault-path" "$source_vault_path"
   assert_not_empty "--target-path" "$target_path"
 

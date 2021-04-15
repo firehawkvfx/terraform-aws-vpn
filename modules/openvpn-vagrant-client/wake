@@ -59,8 +59,8 @@ target_path="$SCRIPTDIR/openvpn_config/$(basename $source_file_path)"
 
 rm -f $SCRIPTDIR/openvpn_config/client.ovpn
 rm -f $SCRIPTDIR/openvpn_config/openvpn.conf
-# $SCRIPTDIR/scripts/get-vault-file --resourcetier $resourcetier --host1 $host1 --host2 $host2 --source-file-path $source_file_path --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
-$SCRIPTDIR/scripts/get-vault-file --resourcetier $resourcetier --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+
+$SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
 
 # Replicate file for vpn.  This might be able to be deprecated, or replaced with a move
 cp -f $SCRIPTDIR/openvpn_config/client.ovpn $SCRIPTDIR/openvpn_config/openvpn.conf
