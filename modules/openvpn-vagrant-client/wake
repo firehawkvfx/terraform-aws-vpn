@@ -27,7 +27,7 @@ fi
 if [[ -z "$VAULT_TOKEN" ]]; then
   echo "You can generate a token to login and retrieve the VPN config with:"
   echo ""
-  echo "vault token create -policy=vpn_read_config -explicit-max-ttl=5m -ttl=5m -use-limit=1"
+  echo "vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=2"
   echo ""
   echo "Provide a vault token to utilise on the private vault client:"
   read -s -p "VAULT_TOKEN: " VAULT_TOKEN
@@ -53,6 +53,7 @@ fi
 
 echo "openvpn_user: $openvpn_user"
 
+echo "Request the VPN config / certs"
 source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
 source_vault_path="$resourcetier/data/vpn/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
 target_path="$SCRIPTDIR/openvpn_config/$(basename $source_file_path)"
@@ -64,5 +65,14 @@ $SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-p
 
 # Replicate file for vpn.  This might be able to be deprecated, or replaced with a move
 cp -f $SCRIPTDIR/openvpn_config/client.ovpn $SCRIPTDIR/openvpn_config/openvpn.conf
+
+echo "Request the deadline client certifcate."
+source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+target_path="$HOME/.ssh/$(basename $source_file_path)"
+
+$SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+
+
 
 openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
