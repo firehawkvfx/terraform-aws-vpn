@@ -31,6 +31,6 @@ cd /deployuser
 tf_action="apply"
 
 # enable promisc mode
-ansible-playbook ansible/init.yaml -v --extra-vars "variable_host=localhost delegate_host=localhost variable_user=deployuser configure_gateway=true set_hostname=$openfirehawkserver_name openfirehawkserver_name=$openfirehawkserver_name openfirehawkserver_ip=$openfirehawkserver_ip" --tags "init-host,init,init-packages"; exit_test
+ansible-playbook ansible/init.yaml -v --extra-vars "variable_host=localhost delegate_host=localhost variable_user=deployuser configure_gateway=true set_hostname=$openfirehawkserver_name openfirehawkserver_name=$openfirehawkserver_name onsite_private_vpn_ip=$onsite_private_vpn_ip" --tags "init-host,init,init-packages"; exit_test
 # enable ipforwarding
 ansible-playbook ansible/openvpn-init.yaml -v --extra-vars "variable_host=localhost" --tags "init"; exit_test
