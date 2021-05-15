@@ -101,51 +101,6 @@ function retrieve_file {
   fi
 }
 
-function get_file_stdout() { # uses stdout to retrieve vault data, avoiding the need to store a file on a remote bastion host.
-  local -r host1=$1
-  local -r host2=$2
-  local -r token="$3"
-  local -r source_vault_path="$4"
-  local -r target_path="$5"
-
-  echo "SSH via: $host1 to: $host2"
-  echo "Retrieve: $source_vault_path"
-
-  response=$(ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$source_vault_path/file" "$token")
-
-  errors=$(echo "$response" | jq -r '.errors | length')
-  if [[ ! $errors -eq 0 ]]; then
-    echo "Vault request failed: $response"
-    exit 1
-  fi
-  
-  echo "mkdir: $(dirname $target_path)"
-  mkdir -p "$(dirname $target_path)" # ensure the directory exists
-  echo "Check file path is writable: $target_path"
-  if test -f "$target_path"; then
-    echo "File exists: ensuring it is writeable"
-    chmod u+w "$target_path"
-    touch "$target_path"
-  else
-    echo "Ensuring path is writeable"
-    touch "$target_path"
-    chmod u+w "$target_path"
-  fi
-  if [[ -f "$target_path" ]]; then
-    chmod u+w "$target_path"
-  else
-    echo "Error: path does not exist, var may not be a file: $target_path "
-  fi
-
-  echo "Write file content from stdout..."
-  echo "$response" | jq -r '.data.data.value' | base64 --decode > $target_path
-  if [[ ! -f "$target_path" ]] || [[ -z "$(cat $target_path)" ]]; then
-    echo "Error: no file or empty result at $target_path"
-    exit 1
-  fi
-  echo "Request Complete."
-}
-
 function getfile {
   local version=""
   local download_url=""
@@ -164,12 +119,8 @@ function getfile {
         host2="$2"
         shift
         ;;
-      # --source-file-path)
-      #   source_file_path="$2"
-      #   shift
-      #   ;;
-      --source-vault-path)
-        source_vault_path="$2"
+      --resourcetier)
+        resourcetier="$2"
         shift
         ;;
       --target-path)
@@ -196,7 +147,7 @@ function getfile {
 
   assert_not_empty "--host1" "$host1"
   assert_not_empty "--host2" "$host2"
-  assert_not_empty "--source-vault-path" "$source_vault_path"
+  assert_not_empty "--resourcetier" "$resourcetier"
   assert_not_empty "--target-path" "$target_path"
 
   if [[ -z "$VAULT_TOKEN" ]]; then
@@ -207,12 +158,13 @@ function getfile {
   bastion_user="$(echo $host2 | awk -F '@' '{print $1}')"
 
   # Retrieve generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
-  log_info "Aquiring file from Vault"
-  # These are temproraily disabled, but should be preserved to retain a procedure to store a file from vault remotely.
-  # get_file_remote "$host1" "$host2" "$VAULT_TOKEN" "$source_file_path" "$source_vault_path" # This method uses a reqest to store the file remotely.  Recommended only if this is the final destination of the secret.
-  # retrieve_file "$host1" "$host2" "$source_file_path" "$target_path" "$bastion_user"
+  log_info "Aquiring values from Vault"
 
-  get_file_stdout "$host1" "$host2" "$VAULT_TOKEN" "$source_vault_path" "$target_path"
+  onsite_private_vpn_ip=$(ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$resourcetier/data/vpn/onsite_private_vpn_ip" "$VAULT_TOKEN" | jq -r '.data.data.value')
+  onsite_private_vpn_mac=$(ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$resourcetier/data/vpn/onsite_private_vpn_mac" "$VAULT_TOKEN" | jq -r '.data.data.value')
+  echo "onsite_private_vpn_mac: $onsite_private_vpn_mac"
+
+  echo "{\"$resourcetier\": {\"onsite_private_vpn_mac\" : \"$onsite_private_vpn_mac\", \"onsite_private_vpn_ip\" : \"$onsite_private_vpn_ip\" }}" | jq . > $target_path
 
   if test -f $target_path; then
     log_info "File aquired!"

@@ -52,6 +52,9 @@ if [[ -z "$openvpn_user_pw" ]]; then
 fi
 
 echo "openvpn_user: $openvpn_user"
+target_path="$SCRIPTDIR/ip_addresses.json"
+echo "Request VPN IP and MAC address"
+$SCRIPTDIR/scripts/get-vpn-info --host1 $host1 --host2 $host2 --target-path $target_path --resourcetier $resourcetier --vault-token $VAULT_TOKEN
 
 echo "Request the VPN config / certs"
 source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
