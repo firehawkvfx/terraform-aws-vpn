@@ -27,7 +27,7 @@ fi
 if [[ -z "$VAULT_TOKEN" ]]; then
   echo "You can generate a token to login and retrieve the VPN config with:"
   echo ""
-  echo "vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=2"
+  echo "vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4"
   echo ""
   echo "Provide a vault token to utilise on the private vault client:"
   read -s -p "VAULT_TOKEN: " VAULT_TOKEN
