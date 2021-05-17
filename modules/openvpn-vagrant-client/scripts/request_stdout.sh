@@ -44,9 +44,9 @@ function retry {
 
 # And use the token to perform operations on vault such as reading a secret
 # These is being retried because race conditions were causing this to come up null sometimes
-set -x
+
 response=$(retry \
   "curl --fail -H 'X-Vault-Token: $token' -X GET https://vault.service.consul:8200/v1/$source_vault_path" \
   "Trying to read secret from vault")
-set +x
+
 echo "$response"
