@@ -32,7 +32,7 @@ function retry {
     output=$(eval "$cmd") && exit_status=0 || exit_status=$?
     errors=$(echo "$output") | grep '^{' | jq -r .errors
 
-    log "$output"
+    # log "$output" # uncomment this to make the response visible.  Not recommended for sensitive values.
 
     if [[ $exit_status -eq 0 && -z "$errors" ]]; then
       echo "$output"
