@@ -1,12 +1,6 @@
-provider "null" {
-  version = "~> 3.0"
-}
+provider "null" {}
 
-provider "aws" {
-  #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
-  # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> 3.15.0"
-}
+provider "aws" {}
 
 data "aws_region" "current" {}
 
@@ -79,23 +73,15 @@ data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terra
     region = data.aws_region.current.name
   }
 }
-data "aws_security_group" "vpn_security_group" { # Aquire the security group ID for external bastion hosts, these will require SSH access to this internal host.  Since multiple deployments may exist, the pipelineid allows us to distinguish between unique deployments.
-  tags = merge( local.common_tags, tomap( {
-    "role": "vpn",
-    "route": "public"
-  } ) )
-  name = "${lookup(local.common_tags, "vpcname", "default")}_openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}" # name is important to use since tags cannot be controlled - names must be unique, so if it was already taken there would be an error.
-  vpc_id = data.aws_vpc.primary.id
-}
 
 module "vpn" {
   source                     = "./modules/tf_aws_openvpn"
   create_vpn                 = true
-  security_group_attachments = [ try(data.aws_security_group.vpn_security_group.id,null) ]
+  security_group_attachments = var.security_group_ids
   example_role_name          = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
   name                       = local.instance_name
   ami                        = var.openvpn_server_ami
-  iam_instance_profile_name  = try( data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name, null ) # if destroy after partial deploy, remote state may not have existed.
+  iam_instance_profile_name  = try(data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name, null) # if destroy after partial deploy, remote state may not have existed.
   resourcetier               = var.resourcetier
   conflictkey                = var.conflictkey
   # VPC Inputs
@@ -103,7 +89,7 @@ module "vpn" {
   vpc_cidr                   = local.vpc_cidr
   vpn_cidr                   = local.vpn_cidr
   combined_vpcs_cidr         = var.combined_vpcs_cidr
-  public_subnet_ids          = local.public_subnets
+  public_subnet_id          = length(local.public_subnets) > 0 ? local.public_subnets[0] : null
   remote_vpn_ip_cidr         = "${local.onsite_public_ip}/32"
   remote_ssh_ip_cidr         = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
   onsite_private_subnet_cidr = local.onsite_private_subnet_cidr

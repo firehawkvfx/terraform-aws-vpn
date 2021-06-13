@@ -18,7 +18,7 @@ variable "sleep" {
 
 variable "openvpn_server_ami" {
   description = "The AMI ID of your OpenVPN Access Server image built with packer"
-  type = string
+  type        = string
 }
 
 variable "environment" {
@@ -35,8 +35,8 @@ variable "pipelineid" {
   type        = string
 }
 variable "conflictkey" {
-    description = "The conflictkey is a unique name for each deployement usuallly consisting of the resourcetier and the pipeid."
-    type = string
+  description = "The conflictkey is a unique name for each deployement usuallly consisting of the resourcetier and the pipeid."
+  type        = string
 }
 
 variable "deployer_ip_cidr" {
@@ -65,7 +65,7 @@ variable "onsite_private_subnet_cidr" {
 
 variable "onsite_public_ip" {
   description = "The public ip address of your onsite location to enable access to security groups and openVPN."
-  type = string
+  type        = string
 }
 
 variable "aws_key_name" {
@@ -74,16 +74,16 @@ variable "aws_key_name" {
 }
 
 variable "bucket_extension_vault" {
-    description = "The bucket extension where the terraform remote state resides"
-    type = string
+  description = "The bucket extension where the terraform remote state resides"
+  type        = string
 }
 variable "resourcetier_vault" {
-    description = "The resourcetier the desired vault vpc resides in"
-    type = string
+  description = "The resourcetier the desired vault vpc resides in"
+  type        = string
 }
 variable "vpcname_vaultvpc" {
-    description = "A namespace component defining the location of the terraform remote state"
-    type = string
+  description = "A namespace component defining the location of the terraform remote state"
+  type        = string
 }
 
 variable "common_tags" {
@@ -94,4 +94,10 @@ variable "common_tags" {
 variable "combined_vpcs_cidr" {
   description = "Terraform will automatically configure multiple VPCs and subnets within this CIDR range for any resourcetier ( dev / green / blue / main )."
   type        = string
+}
+
+variable "security_group_ids" {
+  description = "A list of security group ids to apply to the VPN instance"
+  type        = list(string)
+  default     = []
 }
