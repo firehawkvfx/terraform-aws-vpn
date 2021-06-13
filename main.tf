@@ -89,7 +89,7 @@ module "vpn" {
   vpc_cidr                   = local.vpc_cidr
   vpn_cidr                   = local.vpn_cidr
   combined_vpcs_cidr         = var.combined_vpcs_cidr
-  public_subnet_id          = length(local.public_subnets) > 0 ? local.public_subnets[0] : null
+  public_subnet_id           = length(local.public_subnets) > 0 ? local.public_subnets[0] : null
   remote_vpn_ip_cidr         = "${local.onsite_public_ip}/32"
   remote_ssh_ip_cidr         = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
   onsite_private_subnet_cidr = local.onsite_private_subnet_cidr
@@ -108,16 +108,14 @@ module "vpn" {
   consul_cluster_name    = var.consul_cluster_name
   consul_cluster_tag_key = var.consul_cluster_tag_key
   public_domain_name     = local.public_domain_name
-  # private_domain_name    = local.private_domain # removed this becuase of ref to vault secret - cannot destroy.
-  # private_domain_name = "consul"
-  route_zone_id = local.route_zone_id
+  route_zone_id          = local.route_zone_id
   # # OpenVPN Inputs
   openvpn_user       = "openvpnas"
   openvpn_admin_user = "openvpnas"
-  # bastion_ip               = module.bastion.public_ip # the vpn is provisioned by the bastion entry point
-  # bastion_dependency       = module.bastion.bastion_dependency
-  # firehawk_init_dependency = var.firehawk_init_dependency
-  #sleep will stop instances to save cost during idle time.
-  sleep       = var.sleep
-  common_tags = local.common_tags
+  # SQS
+  sqs_remote_in_vpn = var.sqs_remote_in_vpn
+  host1             = var.host1
+  host2             = var.host2
+  sleep             = var.sleep
+  common_tags       = local.common_tags
 }
