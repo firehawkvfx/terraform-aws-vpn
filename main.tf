@@ -95,7 +95,7 @@ module "vpn" {
   example_role_name          = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
   name                       = local.instance_name
   ami                        = var.openvpn_server_ami
-  iam_instance_profile_name  = data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name
+  iam_instance_profile_name  = try( data.terraform_remote_state.openvpn_profile.outputs.instance_profile_name, null ) # if destroy after partial deploy, remote state may not have existed.
   resourcetier               = var.resourcetier
   conflictkey                = var.conflictkey
   # VPC Inputs
