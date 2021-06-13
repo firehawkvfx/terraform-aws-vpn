@@ -91,7 +91,7 @@ data "aws_security_group" "vpn_security_group" { # Aquire the security group ID 
 module "vpn" {
   source                     = "./modules/tf_aws_openvpn"
   create_vpn                 = true
-  security_group_attachments = [data.aws_security_group.vpn_security_group.id]
+  security_group_attachments = [ try(data.aws_security_group.vpn_security_group.id,null) ]
   example_role_name          = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
   name                       = local.instance_name
   ami                        = var.openvpn_server_ami
