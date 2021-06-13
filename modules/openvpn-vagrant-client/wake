@@ -11,71 +11,73 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
+# if [[ -z "$2" ]]; then
+#   echo "Error: 2nd arg bastion host must be provided. eg:"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
 
-if [[ -z "$2" ]]; then
-  echo "Error: 2nd arg bastion host must be provided. eg:"
-  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
-  exit 1
-fi
+# if [[ -z "$3" ]]; then
+#   echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
 
-if [[ -z "$3" ]]; then
-  echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
-  echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
-  exit 1
-fi
-
-if [[ -z "$VAULT_TOKEN" ]]; then
-  echo "You can generate a token to login and retrieve the VPN config with:"
-  echo ""
-  echo "vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4"
-  echo ""
-  echo "Provide a vault token to utilise on the private vault client:"
-  read -s -p "VAULT_TOKEN: " VAULT_TOKEN
-  echo ""
-fi
+# if [[ -z "$VAULT_TOKEN" ]]; then
+#   echo "You can generate a token to login and retrieve the VPN config with:"
+#   echo ""
+#   echo "vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4"
+#   echo ""
+#   echo "Provide a vault token to utilise on the private vault client:"
+#   read -s -p "VAULT_TOKEN: " VAULT_TOKEN
+#   echo ""
+# fi
 
 export resourcetier="$1"
 echo "resourcetier: $resourcetier"
-host1="$2"
-host2="$3"
 
-openvpn_user="openvpnas"
+# host1="$2"
+# host2="$3"
 
-if [[ -z "$openvpn_user_pw" ]]; then
-    echo "After establishing SSH forwarding, retrieve the VPN password from the Vault UI https://127.0.0.1:8200/ui"
-    read -s -p "openvpn_user_pw: " openvpn_user_pw
-fi
+# openvpn_user="openvpnas"
 
-if [[ -z "$openvpn_user_pw" ]]; then
-    echo "ERROR: provided openvpn_user_pw is empty.  Try again."
-    exit 1
-fi
+# if [[ -z "$openvpn_user_pw" ]]; then
+#     echo "After establishing SSH forwarding, retrieve the VPN password from the Vault UI https://127.0.0.1:8200/ui"
+#     read -s -p "openvpn_user_pw: " openvpn_user_pw
+# fi
 
-echo "openvpn_user: $openvpn_user"
+# if [[ -z "$openvpn_user_pw" ]]; then
+#     echo "ERROR: provided openvpn_user_pw is empty.  Try again."
+#     exit 1
+# fi
+
+# echo "openvpn_user: $openvpn_user"
+
 target_path="$SCRIPTDIR/ip_addresses.json"
 echo "Request VPN IP and MAC address"
-$SCRIPTDIR/scripts/get-vpn-info --host1 $host1 --host2 $host2 --target-path $target_path --resourcetier $resourcetier --vault-token $VAULT_TOKEN
+# $SCRIPTDIR/scripts/get-vpn-info --host1 $host1 --host2 $host2 --target-path $target_path --resourcetier $resourcetier --vault-token $VAULT_TOKEN
+$SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
 
-echo "Request the VPN config / certs"
-source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
-source_vault_path="$resourcetier/data/vpn/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
-target_path="$SCRIPTDIR/openvpn_config/$(basename $source_file_path)"
+# echo "Request the VPN config / certs"
+# source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
+# source_vault_path="$resourcetier/data/vpn/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+# target_path="$SCRIPTDIR/openvpn_config/$(basename $source_file_path)"
 
-rm -f $SCRIPTDIR/openvpn_config/client.ovpn
-rm -f $SCRIPTDIR/openvpn_config/openvpn.conf
+# rm -f $SCRIPTDIR/openvpn_config/client.ovpn
+# rm -f $SCRIPTDIR/openvpn_config/openvpn.conf
 
-$SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+# $SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
 
-# Replicate file for vpn.  This might be able to be deprecated, or replaced with a move
-cp -f $SCRIPTDIR/openvpn_config/client.ovpn $SCRIPTDIR/openvpn_config/openvpn.conf
+# # Replicate file for vpn.  This might be able to be deprecated, or replaced with a move
+# cp -f $SCRIPTDIR/openvpn_config/client.ovpn $SCRIPTDIR/openvpn_config/openvpn.conf
 
-echo "Request the deadline client certifcate."
-source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
-source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
-target_path="$HOME/.ssh/$(basename $source_file_path)"
+# echo "Request the deadline client certifcate."
+# source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+# source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+# target_path="$HOME/.ssh/$(basename $source_file_path)"
 
-$SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+# $SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
 
+# openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
 
-
-openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
+vagrant up
