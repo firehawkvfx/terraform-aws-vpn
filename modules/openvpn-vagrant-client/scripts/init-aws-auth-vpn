@@ -1,0 +1,142 @@
+#!/bin/bash
+
+readonly DEFAULT_POLL_DURATION=3
+
+function print_usage {
+  echo
+  echo "Usage: init-aws-auth-vpn [OPTIONS]"
+  echo
+  echo "Retrieves a specific payload provided by firehawk to an SQS queue.  The payload allows temporary use of a vault token to aquire a VPN cert"
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --resourcetier\tThe environment to use (dev/blue/green/main)"
+  echo
+  echo "Example: Sign this hosts public key with Vault in a dev environment."
+  echo
+  echo "  init-aws-auth-vpn --resourcetier dev"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+    exit 1
+  fi
+  return
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+function ssm_get_parm {
+  local -r parm_name="$1"
+
+  output=$(aws ssm get-parameters --with-decryption --names ${parm_name}) && exit_status=0 || exit_status=$?
+
+  invalid=$(echo ${output} | jq -r .'InvalidParameters | length')
+  if [[ $exit_status -eq 0 && $invalid -eq 0 ]]; then
+      log "Result: ${output}"
+      value=$(echo ${output} | jq -r '.Parameters[0].Value')
+      echo "$value"
+      return
+  fi
+  log "...Failed retrieving: ${parm_name}"
+  log "Result: ${output}"
+}
+
+# function sqs_send_file {
+#   local -r resourcetier="$1"
+#   local -r file_path="$2"
+#   local -r parm_name="$3"
+#   sqs_queue_url="$(ssm_get_parm $parm_name)"
+#   error_if_empty "Could not resolve $parm_name" "$sqs_queue_url"
+#   file_content="$(cat $file_path)"
+#   log "...Sending $file_path to $sqs_queue_url"
+#   aws sqs send-message --queue-url $sqs_queue_url --message-body "$file_content" --message-group-id "$resourcetier"
+# }
+
+function poll_sqs_remote_in_vpn {
+  local -r resourcetier="$1"
+  local -r parm_name="/firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url"
+  local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
+
+  log "...Polling SQS queue for vault and vpn pass"
+  poll="true"
+  while [[ "$poll" == "true" ]]; do
+    local msg="$(aws sqs receive-message --queue-url $sqs_queue_url)"
+    if [[ ! -z "$msg" ]]; then
+      poll="false"
+      reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
+      aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
+    fi
+    log "...Waiting $DEFAULT_POLL_DURATION seconds before retry."
+    sleep $DEFAULT_POLL_DURATION
+  done
+}
+
+function install {
+  local resourcetier=""
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --resourcetier)
+        resourcetier="$2"
+        shift
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
+
+  log "...Awaiting SQS payload for VPN credentials."
+  result="$(poll_sqs_remote_in_vpn $resourcetier)"
+
+  echo "result: $result"
+
+  echo "$result" | jq -r .
+}
+
+install "$@"

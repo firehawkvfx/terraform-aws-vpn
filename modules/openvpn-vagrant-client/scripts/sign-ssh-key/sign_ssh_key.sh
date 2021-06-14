@@ -229,9 +229,6 @@ function poll_public_signed_cert {
   done
 }
 
-# You should be able to ssh into a target host:
-# ssh -i signed-cert.pub -i ~/.ssh/id_rsa username@10.0.23.5
-
 function install {
   local public_key="$DEFAULT_PUBLIC_KEY"
   local resourcetier="$DEFAULT_resourcetier"
