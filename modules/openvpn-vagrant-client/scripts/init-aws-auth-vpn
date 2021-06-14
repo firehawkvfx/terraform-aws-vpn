@@ -117,16 +117,29 @@ function poll_sqs_remote_in_vpn {
   local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
 
   log "...Polling SQS queue for vault and vpn pass"
-  poll="true"
-  while [[ "$poll" == "true" ]]; do
+
+  local -r max_count=3 # set to 1 or larger to limit the number of retries
+  
+  local count=0
+  local poll="true"
+
+  while [[ "$poll" == "true" ]]; do # the funciton will poll the message queue until a message is received, or count is reached.
+    ((count+=1))
+
     local msg="$(aws sqs receive-message --queue-url $sqs_queue_url)"
     if [[ ! -z "$msg" ]]; then
       poll="false"
-      reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
+      local reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
       aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
     fi
-    log "...Waiting $DEFAULT_POLL_DURATION seconds before retry."
-    sleep $DEFAULT_POLL_DURATION
+
+    if [[ $max_count -gt 0 ]] && [[ $count -ge $max_count ]]; then
+      poll="false"
+      log "Max count reached."
+    else
+      log "...Waiting $DEFAULT_POLL_DURATION seconds before retry."
+      sleep $DEFAULT_POLL_DURATION
+    fi
   done
 }
 
@@ -157,22 +170,27 @@ function install {
 
   error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
 
-  # until nc -vzw 2 $ping_host $ping_port; do sleep 2; done
+  if ! /sbin/ifconfig tun0 | grep -q "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"; then
+    log "tun0 down"
+    log "...Await SQS payload for VPN credentials."
+    local -r result="$(poll_sqs_remote_in_vpn $resourcetier)"
 
-  log "...Get SQS payload for VPN credentials."
-  local -r result="$(poll_sqs_remote_in_vpn $resourcetier)"
+    if [[ ! -z "$result" ]]; then
+      local -r openvpn_user="openvpnas"
+      local -r openvpn_user_pw=$(echo "$result" | jq -r '.openvpn_admin_pw')
+      local -r host1=$(echo "$result" | jq -r '.host1')
+      local -r host2=$(echo "$result" | jq -r '.host2')
+      local -r vault_token=$(echo "$result" | jq -r '.token')
 
-  echo "result: $result"
+      get_vpn_cert "$resourcetier" "$host1" "$host2" "$vault_token"
+      cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw"
+    else
+      log "No payload aquired."
+    fi
 
-  local -r openvpn_user="openvpnas"
-  local -r openvpn_user_pw=$(echo "$result" | jq -r '.openvpn_admin_pw')
-  local -r host1=$(echo "$result" | jq -r '.host1')
-  local -r host2=$(echo "$result" | jq -r '.host2')
-  local -r vault_token=$(echo "$result" | jq -r '.token')
-
-  get_vpn_cert "$resourcetier" "$host1" "$host2" "$vault_token"
-
-  cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw"
+  else
+    log "VPN is up"
+  fi
 
 }
 
