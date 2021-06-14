@@ -187,6 +187,7 @@ function sqs_send_file {
   sqs_queue_url="$(ssm_get_parm $parm_name)"
   error_if_empty "Could not resolve $parm_name" "$sqs_queue_url"
   file_content="$(cat $file_path)"
+  log "...Sending $file_path to $sqs_queue_url"
   aws sqs send-message --queue-url $sqs_queue_url --message-body "$file_content" --message-group-id "$resourcetier"
 }
 
