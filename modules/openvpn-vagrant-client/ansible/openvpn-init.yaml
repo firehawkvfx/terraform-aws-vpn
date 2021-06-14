@@ -9,12 +9,24 @@
   become: true
 
   vars:
+    ansible_python_interpreter: "/usr/bin/python3"
     client_network: None
     client_netmask_bits: None
     vpn_nic: eth1
     configure_gateway: true
 
   tasks:
+  - name: ensure file exists (Ubuntu 18 needs this for legacy reasons presently)
+    copy:
+      content: "#!/bin/bash"
+      dest: /etc/rc.local
+      force: no
+      group: sys
+      owner: root
+      mode: 0777
+    tags:
+    - init
+
   - name: insert marker start
     lineinfile:
       path: /etc/rc.local

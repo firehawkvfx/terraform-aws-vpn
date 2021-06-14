@@ -28,9 +28,8 @@ selected_ansible_version = 'latest'
 syscontrol_gid = 9003
 deployuser_uid = 9004
 
-firehawkgateway_box = "bento/ubuntu-16.04"
-box_version = "202102.02.0"
-
+firehawkgateway_box = "bento/ubuntu-18.04"
+box_version = "202105.25.0 "
 
 timezone_localpath = "/usr/share/zoneinfo/Australia/Adelaide" # The Ubuntu file path to configure time / date for your current onsite timezone
 openfirehawkserver_name = "firehawkgateway#{resourcetier}"
