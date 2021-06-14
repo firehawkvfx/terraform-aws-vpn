@@ -4,7 +4,8 @@
 
 set -e
 
-readonly SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 
 set -x
 
@@ -81,7 +82,7 @@ function keygen {
   ssh-keygen -q -b 2048 -t rsa -f $HOME/.ssh/id_rsa -C "" -N ""
 }
 # resourcetier=
-function sign_pub_key {
+function sign_pub_key_request {
   resourcetier="$1"
   $SCRIPTDIR/sign-ssh-key/sign_ssh_key.sh --aws-configure --resourcetier "$resourcetier"
 }
@@ -115,7 +116,7 @@ function install {
 
   install_packages
   keygen
-  sign_pub_key "$resourcetier"
+  sign_pub_key_request "$resourcetier"
 }
 
 install "$@"

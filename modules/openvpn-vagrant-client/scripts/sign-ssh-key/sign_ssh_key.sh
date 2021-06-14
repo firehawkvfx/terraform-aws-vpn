@@ -346,12 +346,14 @@ function install {
   log_info "Configure this host to use trusted CA"
   configure_trusted_ca "$trusted_ca" # configure trusted ca for our host
 
-  if [[ "$poll_public_cert" == "true" ]]; then
+  if [[ "$poll_public_cert" == "true" ]]; then # Get the public cert via sqs
+    log_info "Configure known hosts CA."
+    $SCRIPTDIR/../known-hosts/known_hosts.sh --resourcetier "$resourcetier" --ssm --external-domain ap-southeast-2.compute.amazonaws.com
     log_info "Polling SQS queue for signed cert..."
     public_signed_cert_content="$(poll_public_signed_cert $resourcetier)"
     cert=${public_key/.pub/-cert.pub}
     echo "$public_signed_cert_content" | tee $cert
-  elif [[ "$aquire_pubkey_certs_via_ssm" == "true" ]]; then
+  elif [[ "$aquire_pubkey_certs_via_ssm" == "true" ]]; then # get cert via SSM
     log_info "Requesting SSH Cert via SSM Parameter..."
     cert=${public_key/.pub/-cert.pub}
     get_cert_ssm $cert "$resourcetier"
