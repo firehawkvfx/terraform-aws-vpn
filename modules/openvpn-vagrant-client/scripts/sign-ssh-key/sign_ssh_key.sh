@@ -323,7 +323,11 @@ function install {
     echo "region: $AWS_DEFAULT_REGION"
     echo "access_key: $access_key"
     echo "secret_key: $secret_key"
-    read -p "PRESS ENTER to confirm you have entered these details for the remote host and continue..."
+    echo ""
+    echo "On your remote host, sart the vagrant VM with:"
+    echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --init"
+    echo ""
+    read -p "PRESS ENTER to confirm you have entered the above credentials for the remote host to continue..."
   fi
 
   if [[ "$sqs_get_public_key" == "true" ]]; then
