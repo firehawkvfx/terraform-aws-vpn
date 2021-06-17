@@ -313,11 +313,10 @@ function install {
   if [[ "$generate_aws_key" == "true" ]]; then
     log ""
     log "Assuming you are configuring a Vagrant VPN for first time use."
-    log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
-
+    log "...Aquiring host names for vault queries."
     host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output bastion_public_dns)"
-    host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output vault_client_private_dns)"
-
+    host2="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output vault_client_private_dns)"
+    log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
     sqs_remote_in_vpn_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url)"    
     $TF_VAR_firehawk_path/modules/terraform-aws-vpn/modules/tf_aws_openvpn/scripts/sqs_notify.sh "$resourcetier" "$sqs_remote_in_vpn_url" "$host1" "$host2"    
 
