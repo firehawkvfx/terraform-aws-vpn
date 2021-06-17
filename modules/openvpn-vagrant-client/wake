@@ -164,6 +164,9 @@ function install {
         configure_aws="true"
         shift
         ;;
+      --init)
+        configure_aws="true"
+        ;;
       --help)
         print_usage
         exit
@@ -204,7 +207,8 @@ function install {
     AWS_ACCESS_KEY_ID="$aws_access_key" AWS_SECRET_ACCESS_KEY="$aws_secret_key" AWS_DEFAULT_REGION="$aws_region" $SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
   
     # This step will init vagrant and configure the CLI for the service's persistent use of the credentials
-    configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant up
+    vagrant up
+    configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
   else
     vagrant up
   fi

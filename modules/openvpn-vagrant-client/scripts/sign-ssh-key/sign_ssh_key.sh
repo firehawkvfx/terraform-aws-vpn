@@ -244,6 +244,7 @@ function install {
   local generate_aws_key="false"
   local sqs_get_public_key="false"
   local sqs_send_signed_cert="false"
+  local sqs_send_vpn_payload="false"
   local aws_access_key=""
   local aws_secret_key=""
   local aws_configure="false"
@@ -282,6 +283,7 @@ function install {
         generate_aws_key="true"
         sqs_get_public_key="true"
         sqs_send_signed_cert="true"
+        sqs_send_vpn_payload="true"
         ;;
       --aws-configure) # Provide an access key on a remote client to send public key and recieve cert via an sqs queue
         aws_configure="true"
@@ -313,21 +315,15 @@ function install {
   if [[ "$generate_aws_key" == "true" ]]; then
     log ""
     log "Assuming you are configuring a Vagrant VPN for first time use."
-    log "...Aquiring host names for vault queries."
-    host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output bastion_public_dns)"
-    host2="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output vault_client_private_dns)"
-    log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
-    sqs_remote_in_vpn_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url)"    
-    $TF_VAR_firehawk_path/modules/terraform-aws-vpn/modules/tf_aws_openvpn/scripts/sqs_notify.sh "$resourcetier" "$sqs_remote_in_vpn_url" "$host1" "$host2"    
-
-    # cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/module
-    # terragrunt taint module.vpn.null_resource.sqs_notify[0]
-    # cd $TF_VAR_firehawk_path/..
-    # $TF_VAR_firehawk_path/apply
-
     log ""
-    log "...Generating AWS credentials.  Configure your remote host with these keys to automate SSH and VPN auth."
-    vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
+    log "...Generating AWS credentials.  Configure your remote host with these keys to automate SSH and VPN auth (wake --init)."
+    local -r aws_creds=$(vault read aws/creds/aws-creds-ssm-parameters-ssh-certs)
+    local -r access_key="$(echo "$aws_creds" | awk '/^access_key/ { print $2 ; exit }')"
+    local -r secret_key="$(echo "$aws_creds" | awk '/^secret_key/ { print $2 ; exit }')"
+    echo "region: $AWS_DEFAULT_REGION"
+    echo "access_key: $access_key"
+    echo "secret_key: $secret_key"
+    read -p "PRESS ENTER to confirm you have entered these details for the remote host and continue..."
   fi
 
   if [[ "$sqs_get_public_key" == "true" ]]; then
@@ -416,6 +412,16 @@ function install {
     log_info "Configure cert for use: $cert"
     configure_cert_restart "$cert"
   fi
+
+  if [[ "$sqs_send_vpn_payload" == "true" ]]; then
+    log "...Aquiring host names for vault queries."
+    host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output bastion_public_dns)"
+    host2="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output vault_client_private_dns)"
+    log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
+    sqs_remote_in_vpn_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url)"    
+    $TF_VAR_firehawk_path/modules/terraform-aws-vpn/modules/tf_aws_openvpn/scripts/sqs_notify.sh "$resourcetier" "$sqs_remote_in_vpn_url" "$host1" "$host2"
+  fi
+
   log_info "Complete!"
 }
 
