@@ -13,6 +13,7 @@ function print_usage {
   echo "Usage: init-aws-auth-vpn [OPTIONS]"
   echo
   echo "Retrieves a specific payload provided by firehawk to an SQS queue.  The payload allows temporary use of a vault token to aquire a VPN cert"
+  echo "You must already have AWS credentials configured for this function to work in."
   echo
   echo "Options:"
   echo
@@ -62,6 +63,48 @@ function assert_not_empty {
     print_usage
     exit 1
   fi
+}
+
+# function cron { # See https://stackoverflow.com/questions/878600/how-to-create-a-cron-job-using-bash-automatically-without-the-interactive-editor
+#   local -r resourcetier="$1"
+#   log "...Configuring cron.d to ensure VPN is up once per minute."
+#   sudo cat > /etc/cron.d/aws-auth-vpn << EOF
+# SHELL=/bin/bash 
+# PATH=/sbin:/bin:/usr/sbin:/usr/bin 
+# HOME=/home/deployuser  
+# * * * * * deployuser /deployuser/scripts/init-aws-auth-vpn --resourcetier $resourcetier
+# EOF
+# }
+function install_service { # see https://opensource.com/article/20/7/systemd-timers for further examples
+  local -r resourcetier="$1"
+
+  sudo cat > /etc/systemd/system/awsauthvpn.service << EOF
+[Unit]
+Description=Utilises AWS CLI user credentials to establish an Open VPN connection with Firehawk
+Wants=awsauthvpn.timer
+
+[Service]
+Type=oneshot
+User=deployuser
+Group=deployuser
+ExecStart=/deployuser/scripts/init-aws-auth-vpn --resourcetier $resourcetier
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo cat > /etc/systemd/system/awsauthvpn.timer << EOF
+[Unit]
+Description=Automates a VPN with dynamic credentials on a regulare timer to handle auth changes.
+Requires=awsauthvpn.service
+
+[Timer]
+Unit=awsauthvpn.service
+OnUnitActiveSec=60
+
+[Install]
+WantedBy=timers.target
+EOF
 }
 
 function ssm_get_parm {
@@ -145,6 +188,8 @@ function poll_sqs_remote_in_vpn {
 
 function install {
   local resourcetier=""
+  local run_vpn="true"
+  local install_service="false"
   
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -153,6 +198,10 @@ function install {
       --resourcetier)
         resourcetier="$2"
         shift
+        ;;
+      --install-service)
+        run_vpn="false"
+        install_service="true"
         ;;
       --help)
         print_usage
@@ -170,26 +219,31 @@ function install {
 
   error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
 
-  if ! /sbin/ifconfig tun0 | grep -q "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"; then
-    log "tun0 down"
-    log "...Await SQS payload for VPN credentials."
-    local -r result="$(poll_sqs_remote_in_vpn $resourcetier)"
+  if [[ "$install_service" == "true" ]]; then
+    install_service "$resourcetier"
+  fi
 
-    if [[ ! -z "$result" ]]; then
-      local -r openvpn_user="openvpnas"
-      local -r openvpn_user_pw=$(echo "$result" | jq -r '.openvpn_admin_pw')
-      local -r host1=$(echo "$result" | jq -r '.host1')
-      local -r host2=$(echo "$result" | jq -r '.host2')
-      local -r vault_token=$(echo "$result" | jq -r '.token')
+  if [[ "$run_vpn" == "true" ]]; then
+    if ! /sbin/ifconfig tun0 | grep -q "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"; then
+      log "tun0 down"
+      log "...Await SQS payload for VPN credentials."
+      local -r result="$(poll_sqs_remote_in_vpn $resourcetier)"
 
-      get_vpn_cert "$resourcetier" "$host1" "$host2" "$vault_token"
-      cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw"
+      if [[ ! -z "$result" ]]; then
+        local -r openvpn_user="openvpnas"
+        local -r openvpn_user_pw=$(echo "$result" | jq -r '.openvpn_admin_pw')
+        local -r host1=$(echo "$result" | jq -r '.host1')
+        local -r host2=$(echo "$result" | jq -r '.host2')
+        local -r vault_token=$(echo "$result" | jq -r '.token')
+
+        get_vpn_cert "$resourcetier" "$host1" "$host2" "$vault_token"
+        cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw"
+      else
+        log "No payload aquired."
+      fi
     else
-      log "No payload aquired."
+      log "VPN is up"
     fi
-
-  else
-    log "VPN is up"
   fi
 
 }
