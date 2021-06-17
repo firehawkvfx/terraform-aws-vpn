@@ -79,16 +79,35 @@ function install_packages {
 }
 
 function keygen {
-  ssh-keygen -q -b 2048 -t rsa -f $HOME/.ssh/id_rsa -C "" -N ""
+  private_key_path="$HOME/.ssh/id_rsa"
+  if test ! -f "$private_key_path"; then
+      echo "Generating private / public key pair, since it did not exist yet..."
+      ssh-keygen -q -b 2048 -t rsa -f "$private_key_path" -C "" -N ""
+  fi
 }
 # resourcetier=
-function sign_pub_key_request {
+function sign_pub_key_request_with_prompts {
   resourcetier="$1"
   $SCRIPTDIR/sign-ssh-key/sign_ssh_key.sh --aws-configure --resourcetier "$resourcetier"
 }
 
+function sign_pub_key_request_no_prompts {
+  local -r resourcetier="$1"
+  local -r aws_region="$2"
+  local -r aws_access_key="$3"
+  local -r aws_secret_key="$4"
+
+  aws configure set default.region "$aws_region"
+  aws configure set aws_access_key_id "$aws_access_key"
+  aws configure set aws_secret_access_key "$aws_secret_key"
+  # aws ecr get-login | sudo sh
+
+  $SCRIPTDIR/sign-ssh-key/sign_ssh_key.sh --sqs-send --resourcetier "$resourcetier"
+}
+
 function install {
   local resourcetier=""
+  local no_prompts="false"
   
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -96,6 +115,24 @@ function install {
     case "$key" in
       --resourcetier)
         resourcetier="$2"
+        shift
+        ;;
+      --no-prompts)
+        no_prompts="true"
+        ;;
+      --aws-region)
+        aws_region="$2"
+        configure_aws="true"
+        shift
+        ;;
+      --aws-access-key)
+        aws_access_key="$2"
+        configure_aws="true"
+        shift
+        ;;
+      --aws-secret-key)
+        aws_secret_key="$2"
+        configure_aws="true"
         shift
         ;;
       --help)
@@ -116,7 +153,11 @@ function install {
 
   install_packages
   keygen
-  sign_pub_key_request "$resourcetier"
+  if [[ "$no_prompts" == "true" ]]; then
+    sign_pub_key_request_no_prompts "$resourcetier" "$aws_region" "$aws_access_key" "$aws_secret_key"
+  else
+    sign_pub_key_request_with_prompts "$resourcetier"
+  fi
 }
 
 install "$@"

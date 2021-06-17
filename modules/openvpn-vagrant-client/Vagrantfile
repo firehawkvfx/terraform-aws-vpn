@@ -13,6 +13,13 @@ require 'json'
 bridgenic = "en7: Thunderbolt Ethernet"
 # bridgenic = "none" # use none if you do not know the network connection, you will be prompted.
 
+configure_aws = ENV['configure_aws'] || 'false'
+if configure_aws == 'true'
+    aws_region = ENV['aws_region']
+    aws_access_key = ENV['aws_access_key']
+    aws_secret_key = ENV['aws_secret_key']
+end
+
 if File.file?('ip_addresses.json')
     ip_addresses = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'ip_addresses.json')))
     resourcetier = ip_addresses["resourcetier"]
@@ -154,6 +161,10 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "ansible-config dump"
             # This is deprecated in favour of using a service that polls SQS to init creds.
             # node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars \"variable_host=localhost openvpn_user=#{ENV['openvpn_user']} openvpn_user_pw=#{ENV['openvpn_user_pw']}\"" #, run: 'always' # Connect vpn always on reload
+            if configure_aws == 'true'
+                node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\"", run: "always"
+                node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/init-aws-auth-vpn --resourcetier #{resourcetier} --install-service\"", run: "always"
+            end
             node.vm.post_up_message = "Machine is up IP: #{machine[:box]}"
 
             node.trigger.before :destroy, :halt, :reload do |trigger|

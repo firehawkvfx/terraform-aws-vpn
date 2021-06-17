@@ -6,10 +6,70 @@ EXECDIR="$(pwd)"
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd "$SCRIPTDIR"
 
-if [[ -z "$1" ]]; then
-    echo "ERROR: 1st args provided must be the resourcetier (dev / main) to lookup the local private ip address to be used.  You have configured this in ip_addresses.json"
+
+function print_usage {
+  echo
+  echo "Usage: wake [OPTIONS]"
+  echo
+  echo "Starts a VPN gateway (Vagrant VM)."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --resource-tier\tThe environment to use on first vagrant up. (eg: dev/blue/green/main)."
+  echo -e "  --aws-region\t\tThe region to configure AWS CLI with on first 'vagrant up'."
+  echo -e "  --aws-access-key\tThe AWS Access Key to configure AWS CLI with on first 'vagrant up'."
+  echo -e "  --aws-secret-key\tThe AWS Secret Key to configure AWS CLI with on first 'vagrant up'."
+  echo
+  echo "Example: Start the VPN instance."
+  echo
+  echo "  wake --resourcetier dev"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
     exit 1
-fi
+  fi
+  return
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+# if [[ -z "$1" ]]; then
+#     echo "ERROR: 1st args provided must be the resourcetier (dev / main) to lookup the local private ip address to be used.  You have configured this in ip_addresses.json"
+#     exit 1
+# fi
 
 # if [[ -z "$2" ]]; then
 #   echo "Error: 2nd arg bastion host must be provided. eg:"
@@ -33,8 +93,8 @@ fi
 #   echo ""
 # fi
 
-export resourcetier="$1"
-echo "resourcetier: $resourcetier"
+# export resourcetier="$1"
+# echo "resourcetier: $resourcetier"
 
 # host1="$2"
 # host2="$3"
@@ -52,11 +112,6 @@ echo "resourcetier: $resourcetier"
 # fi
 
 # echo "openvpn_user: $openvpn_user"
-
-target_path="$SCRIPTDIR/ip_addresses.json"
-echo "Request VPN IP and MAC address"
-# $SCRIPTDIR/scripts/get-vpn-info --host1 $host1 --host2 $host2 --target-path $target_path --resourcetier $resourcetier --vault-token $VAULT_TOKEN
-$SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
 
 # echo "Request the VPN config / certs"
 # source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
@@ -80,15 +135,90 @@ $SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resou
 
 # openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
 
-vagrant up
 
-echo ""
-echo "Once the host is up for the first time, you can pair it with your infra by running this to get an SSH certificate:"
-echo "./scripts/init-aws-auth-ssh --resourcetier dev"
-echo ""
-echo "Next to aquire a new set of VPN credentials, this next command will poll for a message providing access credentials to get a new VPN cert (required each time the VPN access server is started)."
-echo "In the VPN terraform template, when it is deployed it will provide some temporary credentials over a message service to retrieve the VPN certificate from Vault."
-echo "./scripts/init-aws-auth-vpn --resourcetier dev"
-echo ""
-echo "To repeat sending new crednetials, terminate the vpn and run deploy/apply to send another message and replace the credentials."
-echo ""
+function install {
+  local resourcetier="$TF_VAR_resourcetier"
+  local configure_aws="false"
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --resourcetier)
+        resourcetier="$2"
+        configure_aws="true"
+        shift
+        ;;
+      --aws-region)
+        aws_region="$2"
+        configure_aws="true"
+        shift
+        ;;
+      --aws-access-key)
+        aws_access_key="$2"
+        configure_aws="true"
+        shift
+        ;;
+      --aws-secret-key)
+        aws_secret_key="$2"
+        configure_aws="true"
+        shift
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  target_path="$SCRIPTDIR/ip_addresses.json"
+
+  if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
+    echo
+    echo "To aquire AWS credentials, run the following from the cloud9 host (or a host with access to Vault):"
+    echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/sign-ssh-key/sign_ssh_key.sh --generate-aws-key"
+    echo
+    if [[ -z "$resourcetier" ]]; then
+      read -p "resourcetier (dev/blue/green/main): " resourcetier
+    fi
+    if [[ -z "$aws_region" ]]; then
+      read -p "aws_region: " aws_region
+    fi
+    if [[ -z "$aws_access_key" ]]; then
+      read -s -p "aws_access_key: " aws_access_key
+      echo
+    fi
+    if [[ -z "$aws_secret_key" ]]; then
+      read -s -p "aws_secret_key: " aws_secret_key
+      echo
+    fi
+    
+    echo "Request VPN IP and MAC address" # these values wont change regularly once user has configured their SSM parameters.
+    AWS_ACCESS_KEY_ID="$aws_access_key" AWS_SECRET_ACCESS_KEY="$aws_secret_key" AWS_DEFAULT_REGION="$aws_region" $SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
+  
+    # This step will init vagrant and configure the CLI for the service's persistent use of the credentials
+    configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant up
+  else
+    vagrant up
+  fi
+
+  echo ""
+  echo "Once the host is up for the first time, you can pair it with your infra by running this to get an SSH certificate:"
+  echo "./scripts/init-aws-auth-ssh --resourcetier dev"
+  echo ""
+  echo "Next to aquire a new set of VPN credentials, this next command will poll for a message providing access credentials to get a new VPN cert (required each time the VPN access server is started)."
+  echo "In the VPN terraform template, when it is deployed it will provide some temporary credentials over a message service to retrieve the VPN certificate from Vault."
+  echo "./scripts/init-aws-auth-vpn --resourcetier dev"
+  echo ""
+  echo "To repeat sending new crednetials, terminate the vpn and run deploy/apply to send another message and replace the credentials."
+  echo ""
+}
+
+install "$@"

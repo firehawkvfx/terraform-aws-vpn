@@ -25,6 +25,11 @@ function print_usage {
   echo "Options:"
   echo
   echo -e "  --public-key\tThe public key to sign (Must end in .pub lowercase). Optional. Default: $DEFAULT_PUBLIC_KEY."
+  echo -e "  --generate-aws-key\tA host authenticated to vault can generate an AWS Key for a remote host to then send it's public key via an SQS queue"
+  echo
+  echo "Example: Generate an AWS key and poll SQS queue for a public key from a remote host."
+  echo
+  echo "  sign_ssh_key.sh --generate-aws-key"
   echo
   echo "Example: Sign this hosts public key with Vault."
   echo
@@ -282,6 +287,12 @@ function install {
         aws_configure="true"
         trusted_ca_via_ssm="true"
         poll_public_cert="true"
+        sqs_send="true"
+        ;;
+      --sqs-send) # Provide an access key on a remote client to send public key and recieve cert via an sqs queue
+        trusted_ca_via_ssm="true"
+        poll_public_cert="true"
+        sqs_send="true"
         ;;
       --help)
         print_usage
@@ -300,6 +311,21 @@ function install {
   error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
 
   if [[ "$generate_aws_key" == "true" ]]; then
+    log ""
+    log "Assuming you are configuring a Vagrant VPN for first time use."
+    log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
+
+    host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output bastion_public_dns)"
+    host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output vault_client_private_dns)"
+
+    sqs_remote_in_vpn_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url)"    
+    $TF_VAR_firehawk_path/modules/terraform-aws-vpn/modules/tf_aws_openvpn/scripts/sqs_notify.sh "$resourcetier" "$sqs_remote_in_vpn_url" "$host1" "$host2"    
+
+    # cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/module
+    # terragrunt taint module.vpn.null_resource.sqs_notify[0]
+    # cd $TF_VAR_firehawk_path/..
+    # $TF_VAR_firehawk_path/apply
+
     log ""
     log "...Generating AWS credentials.  Configure your remote host with these keys to automate SSH and VPN auth."
     vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
@@ -326,6 +352,13 @@ function install {
 
   if [[ "$aws_configure" == "true" ]]; then # we can use an aws secret to provide a channel to post the hosts public key and receive a cert via AWS SQS.
     aws configure # this is an interactive input.
+    # aws configure set default.region us-east-1
+    # aws configure set aws_access_key_id 'YOUR_ACCESS_KEY'
+    # aws configure set aws_secret_access_key 'YOUR_SECRET_KEY'
+    # aws ecr get-login | sudo sh
+  fi
+
+  if [[ "$sqs_send" == "true" ]]; then
     sqs_send_file "$resourcetier" "$HOME/.ssh/id_rsa.pub" "/firehawk/resourcetier/$resourcetier/sqs_cloud_in_cert_url"
   fi
 
