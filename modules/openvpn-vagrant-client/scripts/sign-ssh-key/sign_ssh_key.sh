@@ -217,6 +217,7 @@ function poll_public_key {
 
 function poll_public_signed_cert {
   local -r resourcetier="$1"
+  local -r fingerprint="$2"
   local -r parm_name="/firehawk/resourcetier/$resourcetier/sqs_remote_in_cert_url"
   local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
 
@@ -229,7 +230,7 @@ function poll_public_signed_cert {
       reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
       aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
     fi
-    log "...Waiting $DEFAULT_POLL_DURATION seconds before retry."
+    log "...Waiting $DEFAULT_POLL_DURATION seconds before retry. Ensure you have confirmed fingerprint: $fingerprint"
     sleep $DEFAULT_POLL_DURATION
   done
 }
@@ -331,7 +332,7 @@ function install {
   fi
 
   if [[ "$sqs_get_public_key" == "true" ]]; then
-    configure_cert="false" # if we are getting a remote pub key to produce a cert, then this host will not need to use the result for ssh.
+    configure_cert="false" # if we are getting a remote pub key to produce a cert, then this host will not need to use the result for ssh (we are a server, not client).
     public_key_content="$(poll_public_key $resourcetier)" # poll for a public key and save it to a file
     log "public_key_content: $public_key_content"
     public_key="$HOME/.ssh/remote_host/id_rsa.pub"
@@ -347,6 +348,22 @@ function install {
       log "Failed to write: $target"
       exit 1
     fi
+
+    received_fingerprint="$(ssh-keygen -l -f \"$public_key\")"
+    read -r -p "Does this match the remote host fingerprint: $received_fingerprint [Y/n] " input
+    case $input in
+      [yY][eE][sS]|[yY])
+      log "Yes"
+      ;;
+      [nN][oO]|[nN])
+      log "No"
+      exit 1
+      ;;
+      *)
+      log "Invalid input..."
+      exit 1
+      ;;
+    esac
   fi
 
   if [[ "$aws_configure" == "true" ]]; then # we can use an aws secret to provide a channel to post the hosts public key and receive a cert via AWS SQS.
@@ -357,8 +374,10 @@ function install {
     # aws ecr get-login | sudo sh
   fi
 
+  fingerprint=""
   if [[ "$sqs_send" == "true" ]]; then
     sqs_send_file "$resourcetier" "$HOME/.ssh/id_rsa.pub" "/firehawk/resourcetier/$resourcetier/sqs_cloud_in_cert_url"
+    fingerprint="$(ssh-keygen -l -f $HOME/.ssh/id_rsa.pub)"
   fi
 
   if [[ "$trusted_ca_via_ssm" == "true" ]]; then
@@ -381,8 +400,8 @@ function install {
   if [[ "$poll_public_cert" == "true" ]]; then # Get the public cert via sqs
     log_info "Configure known hosts CA."
     $SCRIPTDIR/../known-hosts/known_hosts.sh --resourcetier "$resourcetier" --ssm --external-domain ap-southeast-2.compute.amazonaws.com
-    log_info "Polling SQS queue for signed cert..."
-    public_signed_cert_content="$(poll_public_signed_cert $resourcetier)"
+    log_info "Polling SQS queue for signed cert... Ensure you have confirmed fingerprint: $fingerprint"
+    public_signed_cert_content="$(poll_public_signed_cert $resourcetier $fingerprint)"
     cert=${public_key/.pub/-cert.pub}
     echo "$public_signed_cert_content" | tee $cert
   elif [[ "$aquire_pubkey_certs_via_ssm" == "true" ]]; then # get cert via SSM
