@@ -221,8 +221,11 @@ function poll_public_signed_cert {
   local -r parm_name="/firehawk/resourcetier/$resourcetier/sqs_remote_in_cert_url"
   local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
 
-  log "...Polling SQS queue for your remote host's signed cert"
-  log "Confirm fingerprint on remote host: $fingerprint"
+  # log "...Polling SQS queue for your remote host's signed cert"
+  log ""
+  log "Please confirm on remote host the fingerprint matches below:"
+  log "$fingerprint"
+
   poll="true"
   while [[ "$poll" == "true" ]]; do
     local msg="$(aws sqs receive-message --queue-url $sqs_queue_url)"
@@ -231,6 +234,7 @@ function poll_public_signed_cert {
       reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
       aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
     fi
+    log "."
     sleep $DEFAULT_POLL_DURATION
   done
 }
@@ -407,7 +411,7 @@ function install {
     log_info "Configure known hosts CA."
     $SCRIPTDIR/../known-hosts/known_hosts.sh --resourcetier "$resourcetier" --ssm --external-domain ap-southeast-2.compute.amazonaws.com
     log_info "Polling SQS queue for signed cert... Ensure you have confirmed fingerprint: $fingerprint"
-    public_signed_cert_content="$(poll_public_signed_cert $resourcetier \"$fingerprint\")"
+    public_signed_cert_content="$(poll_public_signed_cert $resourcetier $fingerprint)"
     cert=${public_key/.pub/-cert.pub}
     echo "$public_signed_cert_content" | tee $cert
   elif [[ "$aquire_pubkey_certs_via_ssm" == "true" ]]; then # get cert via SSM
