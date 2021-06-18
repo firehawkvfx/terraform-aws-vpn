@@ -194,8 +194,8 @@ function sqs_send_file {
   file_content="$(cat $file_path)"
   log "...Sending $file_path to $sqs_queue_url"
   aws sqs send-message --queue-url $sqs_queue_url --message-body "$file_content" --message-group-id "$resourcetier"
-  log "Test recieve message"
-  aws sqs receive-message --queue-url $sqs_queue_url
+  # log "Test recieve message"
+  # aws sqs receive-message --queue-url $sqs_queue_url
 }
 
 function poll_public_key {
@@ -333,7 +333,7 @@ function install {
     echo "access_key: $access_key"
     echo "secret_key: $secret_key"
     echo ""
-    echo "On your remote host, sart the vagrant VM with:"
+    echo "On your remote host, start the vagrant VM with:"
     echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --init"
     echo ""
     read -p "PRESS ENTER to confirm you have entered the above credentials for the remote host to continue..."
