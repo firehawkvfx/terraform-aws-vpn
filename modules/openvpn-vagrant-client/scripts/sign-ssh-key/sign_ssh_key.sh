@@ -321,6 +321,7 @@ function install {
     local -r aws_creds=$(vault read aws/creds/aws-creds-ssm-parameters-ssh-certs)
     local -r access_key="$(echo "$aws_creds" | awk '/^access_key/ { print $2 ; exit }')"
     local -r secret_key="$(echo "$aws_creds" | awk '/^secret_key/ { print $2 ; exit }')"
+    echo ""
     echo "region: $AWS_DEFAULT_REGION"
     echo "access_key: $access_key"
     echo "secret_key: $secret_key"
@@ -352,7 +353,7 @@ function install {
     log "...Aquiring Fingerprint"
     received_fingerprint="$(ssh-keygen -l -f $public_key)"
     received_fingerprint=($received_fingerprint)
-    received_fingerprint=$received_fingerprint[0]
+    received_fingerprint=${received_fingerprint[1]}
     read -r -p "Does this match the remote host's fingerprint: $received_fingerprint [Y/n] " input
     case $input in
       [yY][eE][sS]|[yY])
