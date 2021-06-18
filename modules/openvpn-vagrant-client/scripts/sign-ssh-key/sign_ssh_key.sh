@@ -194,6 +194,8 @@ function sqs_send_file {
   file_content="$(cat $file_path)"
   log "...Sending $file_path to $sqs_queue_url"
   aws sqs send-message --queue-url $sqs_queue_url --message-body "$file_content" --message-group-id "$resourcetier"
+  log "Test recieve message"
+  aws sqs receive-message --queue-url $sqs_queue_url
 }
 
 function poll_public_key {
@@ -234,8 +236,9 @@ function poll_public_signed_cert {
       reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
       aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
     fi
-    log "."
+    log "...Awaiting response: $sqs_queue_url"
     sleep $DEFAULT_POLL_DURATION
+    
   done
 }
 
