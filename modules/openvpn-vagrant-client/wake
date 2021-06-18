@@ -190,16 +190,32 @@ function install {
     echo
     if [[ -z "$resourcetier" ]]; then
       read -p "resourcetier (dev/blue/green/main): " resourcetier
+      if [[ -z "$resourcetier" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
     fi
     if [[ -z "$aws_region" ]]; then
       read -p "aws_region: " aws_region
+      if [[ -z "$aws_region" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
     fi
     if [[ -z "$aws_access_key" ]]; then
       read -s -p "aws_access_key: " aws_access_key
+      if [[ -z "$aws_access_key" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
       echo
     fi
     if [[ -z "$aws_secret_key" ]]; then
       read -s -p "aws_secret_key: " aws_secret_key
+      if [[ -z "$aws_secret_key" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
       echo
     fi
     

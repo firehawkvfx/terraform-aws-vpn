@@ -348,8 +348,9 @@ function install {
       log "Failed to write: $target"
       exit 1
     fi
-
-    received_fingerprint="$(ssh-keygen -l -f \"$public_key\")"
+    
+    log "...Aquiring Fingerprint"
+    received_fingerprint="$(ssh-keygen -l -f $public_key)"
     read -r -p "Does this match the remote host fingerprint: $received_fingerprint [Y/n] " input
     case $input in
       [yY][eE][sS]|[yY])
