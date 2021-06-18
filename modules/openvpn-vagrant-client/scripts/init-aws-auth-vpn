@@ -3,7 +3,7 @@
 set -e
 
 
-readonly DEFAULT_POLL_DURATION=3
+readonly DEFAULT_POLL_DURATION=5
 readonly DEFAULT_SERVICE_INTERVAL=60
 
 EXECDIR="$(pwd)"

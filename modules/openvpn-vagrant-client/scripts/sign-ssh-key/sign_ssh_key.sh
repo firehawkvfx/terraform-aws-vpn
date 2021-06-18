@@ -12,7 +12,7 @@ readonly DEFAULT_PUBLIC_KEY="$HOME/.ssh/id_rsa.pub"
 readonly DEFAULT_TRUSTED_CA="/etc/ssh/trusted-user-ca-keys.pem"
 readonly DEFAULT_SSH_KNOWN_HOSTS="/etc/ssh/ssh_known_hosts"
 readonly DEFAULT_SSH_KNOWN_HOSTS_FRAGMENT=$HOME/.ssh/ssh_known_hosts_fragment
-readonly DEFAULT_POLL_DURATION=3
+readonly DEFAULT_POLL_DURATION=5
 
 # These helper functions are from the sign_ssh_key.sh Hashicorp script
 
