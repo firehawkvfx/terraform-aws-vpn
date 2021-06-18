@@ -351,7 +351,9 @@ function install {
 
     log "...Aquiring Fingerprint"
     received_fingerprint="$(ssh-keygen -l -f $public_key)"
-    read -r -p "Does this match the remote host fingerprint: $received_fingerprint [Y/n] " input
+    received_fingerprint=($received_fingerprint)
+    received_fingerprint=$received_fingerprint[0]
+    read -r -p "Does this match the remote host's fingerprint: $received_fingerprint [Y/n] " input
     case $input in
       [yY][eE][sS]|[yY])
       log "Yes"
