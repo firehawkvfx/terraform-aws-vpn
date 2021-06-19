@@ -4,3 +4,6 @@
 [submodule "modules/openvpn-client"]
 	path = modules/openvpn-client
 	url = ../openvpn-client.git
+[submodule "modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts"]
+	path = modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+	url = https://github.com/firehawkvfx/firehawk-auth-scripts.git
