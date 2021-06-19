@@ -163,7 +163,7 @@ Vagrant.configure(2) do |config|
             # node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars \"variable_host=localhost openvpn_user=#{ENV['openvpn_user']} openvpn_user_pw=#{ENV['openvpn_user_pw']}\"" #, run: 'always' # Connect vpn always on reload
 
             config.vm.provision "bootstrap", type: "shell", run: "never" do |s| # Configure the AWS CLI credentials.
-                s.inline = "sudo -i -u deployuser bash -c \"/vagrant/scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\""
+                s.inline = "sudo -i -u deployuser bash -c \"/vagrant/scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\""
             end
 
             config.vm.provision "vpn", type: "shell", run: "never" do |s| # Install the AWS VPN dynamic credentials service
@@ -171,7 +171,7 @@ Vagrant.configure(2) do |config|
             end
 
             # if configure_aws == 'true'
-            #     node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\"", run: "always"
+            #     node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\"", run: "always"
             #     node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/init-aws-auth-vpn --resourcetier #{resourcetier} --install-service\"", run: "always"
             # end
 

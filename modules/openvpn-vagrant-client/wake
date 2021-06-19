@@ -231,7 +231,7 @@ function install {
 
   echo ""
   echo "Once the host is up for the first time, you can pair it with your infra by running this to get an SSH certificate:"
-  echo "./scripts/init-aws-auth-ssh --resourcetier dev"
+  echo "./scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier dev"
   echo ""
   echo "Next to aquire a new set of VPN credentials, this next command will poll for a message providing access credentials to get a new VPN cert (required each time the VPN access server is started)."
   echo "In the VPN terraform template, when it is deployed it will provide some temporary credentials over a message service to retrieve the VPN certificate from Vault."
