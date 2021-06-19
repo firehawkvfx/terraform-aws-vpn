@@ -16,21 +16,21 @@ readonly DEFAULT_EXTERNAL_DOMAIN="$TF_VAR_aws_external_domain"
 
 function print_usage {
   echo
-  echo "Usage: known_hosts.sh [OPTIONS]"
+  echo "Usage: known-hosts [OPTIONS]"
   echo
   echo "If authenticated to Vault, signs a public key with Vault for use as an SSH client, generating a public certificate in the same directory as the public key with the suffix '-cert.pub'."
   echo
   echo "Example: Configure the CA for this host to recognize known hosts with Vault."
   echo
-  echo "  ./known_hosts.sh"
+  echo "  ./known-hosts"
   echo
   echo "Example: Using AWS SSM parameters, Configure a provided CA file and trusted known hosts CA where vault access is not available, specifying a valid external dns name"
   echo
-  echo "  ./known_hosts.sh --ssm --external-domain ap-southeast-2.compute.amazonaws.com"
+  echo "  ./known-hosts --ssm --external-domain ap-southeast-2.compute.amazonaws.com"
   echo
   echo "Example: Configure a provided CA file and trusted known hosts CA where vault access is not available, specifying a valid external dns name"
   echo
-  echo "  ./known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment"
+  echo "  ./known-hosts --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment"
 }
 
 function log {

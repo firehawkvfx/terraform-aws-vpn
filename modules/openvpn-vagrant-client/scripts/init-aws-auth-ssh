@@ -88,7 +88,7 @@ function keygen {
 # resourcetier=
 function sign_pub_key_request_with_prompts {
   resourcetier="$1"
-  $SCRIPTDIR/sign-ssh-key/sign_ssh_key.sh --aws-configure --resourcetier "$resourcetier"
+  $SCRIPTDIR/firehawk-auth-scripts/sign-ssh-key --aws-configure --resourcetier "$resourcetier"
 }
 
 function sign_pub_key_request_no_prompts {
@@ -102,7 +102,7 @@ function sign_pub_key_request_no_prompts {
   aws configure set aws_secret_access_key "$aws_secret_key"
   # aws ecr get-login | sudo sh
 
-  $SCRIPTDIR/sign-ssh-key/sign_ssh_key.sh --sqs-send --resourcetier "$resourcetier"
+  $SCRIPTDIR/firehawk-auth-scripts/sign-ssh-key --sqs-send --resourcetier "$resourcetier"
 }
 
 function install {

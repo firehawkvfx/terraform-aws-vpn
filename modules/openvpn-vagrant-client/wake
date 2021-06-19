@@ -186,7 +186,7 @@ function install {
   if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
     echo
     echo "To aquire AWS credentials, run the following from the cloud9 host (or a host with access to Vault):"
-    echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/sign-ssh-key/sign_ssh_key.sh --generate-aws-key"
+    echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts/sign-ssh-key --generate-aws-key --aws-backend-role aws-creds-vpn-cert"
     echo
     if [[ -z "$resourcetier" ]]; then
       read -p "resourcetier (dev/blue/green/main): " resourcetier
