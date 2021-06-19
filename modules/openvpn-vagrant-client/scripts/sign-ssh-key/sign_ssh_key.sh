@@ -325,7 +325,7 @@ function install {
     log "Assuming you are configuring a Vagrant VPN for first time use."
     log ""
     log "...Generating AWS credentials.  Configure your remote host with these keys to automate SSH and VPN auth (wake --init)."
-    local -r aws_creds=$(vault read aws/creds/aws-creds-ssm-parameters-ssh-certs)
+    local -r aws_creds=$(vault read aws/creds/aws-creds-vpn-cert)
     local -r access_key="$(echo "$aws_creds" | awk '/^access_key/ { print $2 ; exit }')"
     local -r secret_key="$(echo "$aws_creds" | awk '/^secret_key/ { print $2 ; exit }')"
     echo ""
