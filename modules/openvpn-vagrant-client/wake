@@ -235,7 +235,7 @@ function install {
   echo ""
   echo "Next to aquire a new set of VPN credentials, this next command will poll for a message providing access credentials to get a new VPN cert (required each time the VPN access server is started)."
   echo "In the VPN terraform template, when it is deployed it will provide some temporary credentials over a message service to retrieve the VPN certificate from Vault."
-  echo "./scripts/init-aws-auth-vpn --resourcetier dev"
+  echo "./scripts/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier dev"
   echo ""
   echo "To repeat sending new crednetials, terminate the vpn and run deploy/apply to send another message and replace the credentials."
   echo ""
