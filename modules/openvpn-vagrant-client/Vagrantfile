@@ -1,8 +1,5 @@
-# - bring up the vpn
-# - bring up the vagrant host.
-# - start with: openvpn_user=openvpnas openvpn_user_pw=MYVPNPASSWORDFROMVAULT vagrant up
-# ensure the version of virutal box installed matches all dependencies - VirtualBox 6.0.14:
-# further notes on plugin versions at the end of this script
+# - bring up the vpn access server
+# - start with: ./wake -init
 
 # Ensure you have the vagrant guest plugin:
 # vagrant plugin install vagrant-vbguest
@@ -144,23 +141,12 @@ Vagrant.configure(2) do |config|
             end
             # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
             node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
-            # we define the location of the ansible hosts file in an environment variable.
-            # node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' | sudo tee -a /etc/environment"
             node.vm.provision "shell", inline: <<-EOC
                 sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
             EOC
-            # node.vm.provision "shell", inline: "sudo reboot"
-            # node.vm.provision :reload
-            # node.trigger.after :up do |trigger|
-            #     trigger.warn = "Restarted for SSH config service alteration"
-            # end
-
             node.vm.provision "shell", inline: "set -x; export openfirehawkserver_name=#{openfirehawkserver_name}; export onsite_private_vpn_ip=#{onsite_private_vpn_ip} ; /deployuser/scripts/init-gateway.sh --#{resourcetier}"
             node.vm.provision "shell", inline: "sudo reboot"
             node.vm.provision :reload
-            node.vm.provision "shell", inline: "ansible-config dump"
-            # This is deprecated in favour of using a service that polls SQS to init creds.
-            # node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/openvpn.yaml -v --extra-vars \"variable_host=localhost openvpn_user=#{ENV['openvpn_user']} openvpn_user_pw=#{ENV['openvpn_user_pw']}\"" #, run: 'always' # Connect vpn always on reload
 
             config.vm.provision "bootstrap", type: "shell", run: "never" do |s| # Configure the AWS CLI credentials.
                 s.inline = "sudo -i -u deployuser bash -c \"/vagrant/scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\""
@@ -170,21 +156,14 @@ Vagrant.configure(2) do |config|
                 s.inline = "sudo -i -u deployuser bash -c \"/vagrant/scripts/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier #{resourcetier} --install-service\""
             end
 
-            # if configure_aws == 'true'
-            #     node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier #{resourcetier} --no-prompts --aws-region #{aws_region} --aws-access-key #{aws_access_key} --aws-secret-key #{aws_secret_key}\"", run: "always"
-            #     node.vm.provision "shell", inline: "sudo -i -u deployuser bash -c \"/vagrant/scripts/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier #{resourcetier} --install-service\"", run: "always"
-            # end
-
             node.vm.post_up_message = "Machine is up IP: #{machine[:box]}"
 
             node.trigger.before :destroy, :halt, :reload do |trigger|
                 trigger.info = "Stopping node..."
                 trigger.run = {inline: "echo 'stopping node'"}
-                # trigger.run = {inline: "sleep 5"}
             end
         end
     end
-    # if box_file_in.nil? || box_file_in.empty?
     VAGRANT_COMMAND = ARGV[0]
     if VAGRANT_COMMAND == "ssh"
         config.ssh.username = 'deployuser'
