@@ -54,13 +54,14 @@ function ssm_get_parm {
 
   invalid=$(echo ${output} | jq -r .'InvalidParameters | length')
   if [[ $exit_status -eq 0 && $invalid -eq 0 ]]; then
-      log "Result: ${output}"
-      value=$(echo ${output} | jq -r '.Parameters[0].Value')
-      echo "$value"
-      return
+    log "Result: ${output}"
+    value=$(echo ${output} | jq -r '.Parameters[0].Value')
+    echo "$value"
+    return
   fi
   log "...Failed retrieving: ${parm_name}"
   log "Result: ${output}"
+  exit 1
 }
 
 function assert_not_empty {

@@ -230,14 +230,11 @@ function install {
   fi
 
   echo ""
-  echo "Once the host is up for the first time, you can pair it with your infra by running this to get an SSH certificate:"
-  echo "./scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier dev"
+  echo "Further developement is required to secure the VPN against threats that originate in your private network."
   echo ""
-  echo "Next to aquire a new set of VPN credentials, this next command will poll for a message providing access credentials to get a new VPN cert (required each time the VPN access server is started)."
-  echo "In the VPN terraform template, when it is deployed it will provide some temporary credentials over a message service to retrieve the VPN certificate from Vault."
-  echo "./scripts/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier dev"
-  echo ""
-  echo "To repeat sending new crednetials, terminate the vpn and run deploy/apply to send another message and replace the credentials."
+  echo "This VPN is only suited for use in a dev environment on a secure network.  It is recommended you log in and disable inbound SSH on the VM permanently - this will also prevent vagrant from further provisioning."
+  echo "You can destroy the VM with the command:"
+  echo "./destroy dev"
   echo ""
 }
 

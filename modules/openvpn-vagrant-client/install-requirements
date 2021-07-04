@@ -13,11 +13,11 @@ function has_brew {
 }
 
 if $(has_apt_get); then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y jq virtualbox vagrant
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y jq virtualbox vagrant awscli openssh-server
 elif $(has_yum); then
-    sudo yum install -y jq virtualbox vagrant
+    sudo yum install -y jq virtualbox vagrant awscli openssh-server
 elif $(has_brew); then
-    sudo brew install -y jq virtualbox vagrant
+    sudo brew install -y jq virtualbox vagrant awscli
 else
     echo "Could not find apt-get, yum, or brew. Cannot install dependencies on this OS."
     exit 1
