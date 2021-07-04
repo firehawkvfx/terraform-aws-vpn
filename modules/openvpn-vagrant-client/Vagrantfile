@@ -4,6 +4,9 @@
 # Ensure you have the vagrant guest plugin:
 # vagrant plugin install vagrant-vbguest
 
+# shared folder can be disabled with:
+# config.vm.synced_folder '/host/path', '/guest/path', SharedFoldersEnableSymlinksCreate: false
+
 require 'json'
 
 # bridgenic = "en0: Wi-Fi (Wireless)" # eg: 'none' or 'en0: Wi-Fi (AirPort)'
