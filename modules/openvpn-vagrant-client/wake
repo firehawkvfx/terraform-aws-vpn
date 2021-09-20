@@ -15,10 +15,12 @@ function print_usage {
   echo
   echo "Options:"
   echo
+  echo -e "  --init\t\tPrompt for all requirements to establish a connection."
   echo -e "  --resource-tier\tThe environment to use on first vagrant up. (eg: dev/blue/green/main)."
   echo -e "  --aws-region\t\tThe region to configure AWS CLI with on first 'vagrant up'."
   echo -e "  --aws-access-key\tThe AWS Access Key to configure AWS CLI with on first 'vagrant up'."
   echo -e "  --aws-secret-key\tThe AWS Secret Key to configure AWS CLI with on first 'vagrant up'."
+  echo -e "  --help\t\tShow args / options."
   echo
   echo "Example: Start the VPN instance."
   echo
