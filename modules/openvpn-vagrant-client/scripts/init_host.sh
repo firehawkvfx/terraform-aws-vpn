@@ -53,7 +53,8 @@ sudo usermod -aG syscontrol ${initial_user}
 id -u deployuser &>/dev/null || sudo useradd -m -s /bin/bash -U deployuser -u ${deployuser_uid}
 sudo usermod -aG syscontrol deployuser
 sudo usermod -aG sudo deployuser
-sudo touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser
+sudo touch /etc/sudoers.d/98_deployuser
+sudo grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/98_deployuser
 sudo cp -fr /home/${initial_user}/.ssh /home/deployuser/
 sudo chown -R deployuser:deployuser /home/deployuser/.ssh
 sudo chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys
