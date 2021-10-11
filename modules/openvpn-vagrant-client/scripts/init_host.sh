@@ -79,7 +79,9 @@ else
 fi
 
 sudo grep -qxF 'ConnectTimeout 60' /etc/sudoers.d/98_deployuser || echo 'ConnectTimeout 60' | sudo tee -a /etc/ssh/ssh_config
-sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+
+echo "WARNING: PASSWORD AUTHENTICATION IS LEFT ENABLED.  YOU MAY WISH TO USE SSH KEYS ONLY AND DISABLE PASSWORD LOGIN BY CONFIGURING THIS YOURSELF."
+# sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 
 set -x
 export openfirehawkserver_name=${openfirehawkserver_name}
