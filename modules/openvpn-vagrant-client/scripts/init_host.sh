@@ -16,8 +16,10 @@ ip_addresses_file="${SCRIPTDIR}/../ip_addresses.json"
 
 sudo apt-get install jq -y
 
-if test ! -f "$ip_addresses_file"; then
+if test -f "$ip_addresses_file"; then
+    echo "Read: $ip_addresses_file"
     output=$(cat "$ip_addresses_file")
+    echo "Aquired: $output"
     resourcetier=$(echo ${output} | jq -r ".resourcetier")
     onsite_private_vpn_mac=$(echo ${output} | jq -r ".${resourcetier}.onsite_private_vpn_mac")
     onsite_private_vpn_ip=$(echo ${output} | jq -r ".${resourcetier}.onsite_private_vpn_ip")
