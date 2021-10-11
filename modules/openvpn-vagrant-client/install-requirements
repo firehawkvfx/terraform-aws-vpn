@@ -54,7 +54,7 @@ function run_it {
 
   if [[ "$host_type" == "vagrant" ]]; then
     if $(has_apt_get); then
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y jq virtualbox vagrant awscli openssh-server net-tools
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y jq virtualbox vagrant awscli openssh-server
     elif $(has_yum); then
         sudo yum install -y jq virtualbox vagrant awscli openssh-server
     elif $(has_brew); then
