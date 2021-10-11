@@ -78,20 +78,20 @@ else
     sudo -H pip install ansible==${ansible_version}
 fi
 
-echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config
+sudo grep -qxF 'ConnectTimeout 60' /etc/sudoers.d/98_deployuser || echo 'ConnectTimeout 60' | sudo tee -a /etc/ssh/ssh_config
 sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 
 set -x
 export openfirehawkserver_name=${openfirehawkserver_name}
 export onsite_private_vpn_ip=${onsite_private_vpn_ip}
-/deployuser/scripts/init-gateway.sh --${resourcetier}
+${SCRIPTDIR}/init-gateway.sh --${resourcetier}
 
-sudo reboot
+# sudo reboot
 
-# after reboot of vm, promisc mode should be available.
+# # after reboot of vm, promisc mode should be available.
 
-echo "Bootstrapping..."
-sudo -i -u deployuser bash -c "${SCRIPTDIR}/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier ${resourcetier} --no-prompts --aws-region ${aws_region} --aws-access-key ${aws_access_key} --aws-secret-key ${aws_secret_key}"
+# echo "Bootstrapping..."
+# sudo -i -u deployuser bash -c "${SCRIPTDIR}/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier ${resourcetier} --no-prompts --aws-region ${aws_region} --aws-access-key ${aws_access_key} --aws-secret-key ${aws_secret_key}"
 
-sudo -i -u deployuser bash -c "${SCRIPTDIR}/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier ${resourcetier} --install-service"
+# sudo -i -u deployuser bash -c "${SCRIPTDIR}/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier ${resourcetier} --install-service"
 
