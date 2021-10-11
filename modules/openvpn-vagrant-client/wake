@@ -142,6 +142,7 @@ function install {
   local resourcetier="$TF_VAR_resourcetier"
   local configure_aws="false"
   local host_type="vagrant"
+  local stage="init"
   
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -169,6 +170,10 @@ function install {
         ;;
       --host-type)
         host_type="$2"
+        shift
+        ;;
+      --stage)
+        stage="$2"
         shift
         ;;
       --init)
@@ -234,8 +239,13 @@ function install {
       vagrant up
       configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
     elif [[ "$host_type" == "metal" ]]; then
-      echo "Will configure the current host to use Open VPN and AWS CLI Credentials"
-      initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host.sh
+      if [[ "$stage" == "init" ]]; then
+        echo "Will configure the current host to use Open VPN and AWS CLI Credentials"
+        initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host.sh
+      elif [[ "$stage" == "post_reboot" ]]; then
+        echo "POST REBOOT: Will configure the current host to use Open VPN and AWS CLI Credentials"
+        initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host_post_reboot.sh
+      fi
     fi
   else
     vagrant up
