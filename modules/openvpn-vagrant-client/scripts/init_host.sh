@@ -60,7 +60,8 @@ sudo chown -R deployuser:deployuser /home/deployuser/.ssh
 sudo chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys
 
 # define environment on boot
-echo "source ${SCRIPTDIR}/env.sh" > /etc/profile.d/sa-environment.sh
+sudo touch /etc/profile.d/sa-environment.sh
+echo "source ${SCRIPTDIR}/env.sh" | sudo tee /etc/profile.d/sa-environment.sh
 ip a
 export DEBIAN_FRONTEND=noninteractive
 
