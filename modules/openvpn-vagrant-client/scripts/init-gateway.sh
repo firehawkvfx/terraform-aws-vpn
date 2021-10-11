@@ -24,7 +24,7 @@ echo "Argument $1"
 echo ""
 ARGS=''
 
-cd /deployuser
+cd $SCRIPTDIR/..
 
 ### Get s3 access keys from terraform ###
 
