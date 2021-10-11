@@ -141,6 +141,7 @@ function assert_not_empty {
 function install {
   local resourcetier="$TF_VAR_resourcetier"
   local configure_aws="false"
+  local host_type="vagrant"
   
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -164,6 +165,10 @@ function install {
       --aws-secret-key)
         aws_secret_key="$2"
         configure_aws="true"
+        shift
+        ;;
+      --host-type)
+        host_type="$2"
         shift
         ;;
       --init)
@@ -224,9 +229,14 @@ function install {
     echo "Request VPN IP and MAC address" # these values wont change regularly once user has configured their SSM parameters.
     AWS_ACCESS_KEY_ID="$aws_access_key" AWS_SECRET_ACCESS_KEY="$aws_secret_key" AWS_DEFAULT_REGION="$aws_region" $SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
   
-    # This step will init vagrant and configure the CLI for the service's persistent use of the credentials
-    vagrant up
-    configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
+    if [[ "$host_type" == "vagrant" ]]; then
+      echo "Will init vagrant and configure the CLI for the service's persistent use of the credentials..."
+      vagrant up
+      configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
+    elif [[ "$host_type" == "metal" ]]; then
+      echo "Will configure the current host to use Open VPN and AWS CLI Credentials"
+      configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host.sh
+    fi
   else
     vagrant up
   fi
