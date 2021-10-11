@@ -242,9 +242,9 @@ function install {
   fi
 
   echo ""
-  echo "Further developement is required to secure the VPN against threats that originate in your private network."
+  echo "If you are using Vagrant further developement is required to secure the VPN against threats that originate in your private network. Using a Raspberry PI is the prefered approach."
   echo ""
-  echo "This VPN is only suited for use in a dev environment on a secure network.  It is recommended you log in and disable inbound SSH on the VM permanently - this will also prevent vagrant from further provisioning."
+  echo "A Vagrant VPN is only suited for use in a dev environment on a secure network.  It is recommended you log in and disable inbound SSH on the VM permanently - this will also prevent vagrant from further provisioning."
   echo "You can destroy the VM with the command:"
   echo "./destroy dev"
   echo ""
