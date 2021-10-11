@@ -235,7 +235,7 @@ function install {
       configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
     elif [[ "$host_type" == "metal" ]]; then
       echo "Will configure the current host to use Open VPN and AWS CLI Credentials"
-      configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host.sh
+      initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host.sh
     fi
   else
     vagrant up

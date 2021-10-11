@@ -18,9 +18,9 @@ sudo apt-get install jq -y
 
 if test ! -f "$ip_addresses_file"; then
     output=$(cat "$ip_addresses_file")
-    resourcetier=$(echo ${output} | jq -r ".${resourcetier}")
-    onsite_private_vpn_mac=$(echo ${output} | jq -r ".${resourcetier}.${onsite_private_vpn_mac}")
-    onsite_private_vpn_ip=$(echo ${output} | jq -r ".${resourcetier}.${onsite_private_vpn_ip}")
+    resourcetier=$(echo ${output} | jq -r ".resourcetier")
+    onsite_private_vpn_mac=$(echo ${output} | jq -r ".${resourcetier}.onsite_private_vpn_mac")
+    onsite_private_vpn_ip=$(echo ${output} | jq -r ".${resourcetier}.onsite_private_vpn_ip")
 else
     onsite_private_vpn_mac='none'
     onsite_private_vpn_ip='none'
@@ -28,27 +28,31 @@ fi
 
 if [[ -z "$resourcetier" ]]; then
     echo "ERROR: env var resourcetier not defined"
+    exit 1
 fi
 if [[ -z "$aws_region" ]]; then
     echo "ERROR: env var aws_region not defined"
+    exit 1
 fi
 if [[ -z "$aws_access_key" ]]; then
     echo "ERROR: env var aws_access_key not defined"
+    exit 1
 fi
 if [[ -z "$aws_secret_key" ]]; then
     echo "ERROR: env var aws_secret_key not defined"
+    exit 1
 fi
 
 openfirehawkserver_name="firehawkgateway${resourcetier}"
 
 echo 'create syscontrol group'
 getent group syscontrol || sudo groupadd -g ${syscontrol_gid} syscontrol
-sudo usermod -aG syscontrol vagrant
+sudo usermod -aG syscontrol ${initial_user}
 id -u deployuser &>/dev/null || sudo useradd -m -s /bin/bash -U deployuser -u ${deployuser_uid}
 sudo usermod -aG syscontrol deployuser
 sudo usermod -aG sudo deployuser
 touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser
-cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys
+cp -fr /home/${initial_user}/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys
 
 # define environment on boot
 echo "source ${SCRIPTDIR}/env.sh" > /etc/profile.d/sa-environment.sh
