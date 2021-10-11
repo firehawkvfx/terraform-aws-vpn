@@ -53,8 +53,10 @@ sudo usermod -aG syscontrol ${initial_user}
 id -u deployuser &>/dev/null || sudo useradd -m -s /bin/bash -U deployuser -u ${deployuser_uid}
 sudo usermod -aG syscontrol deployuser
 sudo usermod -aG sudo deployuser
-touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser
-cp -fr /home/${initial_user}/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys
+sudo touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser
+sudo cp -fr /home/${initial_user}/.ssh /home/deployuser/
+sudo chown -R deployuser:deployuser /home/deployuser/.ssh
+sudo chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys
 
 # define environment on boot
 echo "source ${SCRIPTDIR}/env.sh" > /etc/profile.d/sa-environment.sh
