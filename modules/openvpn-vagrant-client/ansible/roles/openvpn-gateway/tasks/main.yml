@@ -3,7 +3,7 @@
 
 - name: Ansible copy certs
   copy:
-    src: /deployuser/openvpn_config/{{ item }}
+    src: /opt/openvpn_config/{{ item }}
     dest: /home/deployuser/openvpn_config/
     owner: deployuser
     group: deployuser
