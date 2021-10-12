@@ -88,7 +88,7 @@ export openfirehawkserver_name=${openfirehawkserver_name}
 export onsite_private_vpn_ip=${onsite_private_vpn_ip}
 # ${SCRIPTDIR}/init-gateway.sh --${resourcetier} eth0
 
-cd $SCRIPTDIR/..
+cd $SCRIPTDIR/scripts/firehawk-auth-scripts
 # old init-gateway script - init-gateway.sh
 # enable promisc mode
 ansible-playbook ansible/init.yaml -v --extra-vars "variable_host=localhost delegate_host=localhost variable_user=deployuser configure_gateway=true set_hostname=$openfirehawkserver_name openfirehawkserver_name=$openfirehawkserver_name onsite_private_vpn_ip=$onsite_private_vpn_ip" --tags "init-host,init,init-packages"
