@@ -242,7 +242,8 @@ function install {
       if [[ "$stage" == "init" ]]; then
         echo "Will configure the current host to use Open VPN and AWS CLI Credentials"
         initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host.sh
-      elif [[ "$stage" == "post_reboot" ]]; then
+        initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host_post_reboot.sh
+      elif [[ "$stage" == "post_reboot" ]]; then # This may be removable in the context of a non vagrant install.
         echo "POST REBOOT: Will configure the current host to use Open VPN and AWS CLI Credentials"
         initial_user='ubuntu' configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" $SCRIPTDIR/scripts/init_host_post_reboot.sh
       fi
