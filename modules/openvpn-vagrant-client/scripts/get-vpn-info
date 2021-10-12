@@ -22,7 +22,7 @@ function print_usage {
   echo
   echo "Example:"
   echo
-  echo "  get-vault-file --host1 centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com --host2 centos@i-0df3060971160cdd6.node.consul --source-vault-path dev/data/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/client.ovpn --target-path ../../openvpn_config/client.ovpn --vault-token 34hgkj323r2wgsg"
+  echo "  get-vault-file --host1 centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com --host2 centos@i-0df3060971160cdd6.node.consul --source-vault-path dev/data/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/client.ovpn --target-path ../openvpn_config/client.ovpn --vault-token 34hgkj323r2wgsg"
 }
 
 function log {
