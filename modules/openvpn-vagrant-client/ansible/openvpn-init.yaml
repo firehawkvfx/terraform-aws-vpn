@@ -12,7 +12,7 @@
     ansible_python_interpreter: "/usr/bin/python3"
     client_network: None
     client_netmask_bits: None
-    vpn_nic: eth1
+    # vpn_nic: eth1 # no default - this arg must be provided
     configure_gateway: true
 
   tasks:
