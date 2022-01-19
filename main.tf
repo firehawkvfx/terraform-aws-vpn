@@ -91,7 +91,6 @@ module "vpn" {
   combined_vpcs_cidr         = var.combined_vpcs_cidr
   public_subnet_id           = length(local.public_subnets) > 0 ? local.public_subnets[0] : null
   remote_vpn_ip_cidr         = "${local.onsite_public_ip}/32"
-  remote_ssh_ip_cidr         = var.deployer_ip_cidr # This may be the same as above, but can be different if using cloud 9 for deployment
   onsite_private_subnet_cidr = local.onsite_private_subnet_cidr
   private_route_table_ids    = local.private_route_table_ids
   public_route_table_ids     = local.public_route_table_ids
