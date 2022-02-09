@@ -193,9 +193,10 @@ function install {
     shift
   done
 
-  target_path="$SCRIPTDIR/ip_addresses.json"
+  # target_path="$SCRIPTDIR/ip_addresses.json"
 
-  if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
+  # if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
+  if [[ "$configure_aws" == "true" ]]
     echo
     echo "To aquire AWS credentials, run the following from the cloud9 host (or a host with access to Vault):"
     echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts/sign-ssh-key --generate-aws-key --aws-backend-role aws-creds-vpn-cert"
@@ -231,13 +232,11 @@ function install {
       echo
     fi
     
-    echo "Request VPN IP and MAC address" # these values wont change regularly once user has configured their SSM parameters.
-    AWS_ACCESS_KEY_ID="$aws_access_key" AWS_SECRET_ACCESS_KEY="$aws_secret_key" AWS_DEFAULT_REGION="$aws_region" $SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
-  
     if [[ "$host_type" == "vagrant" ]]; then
-      echo "Will init vagrant and configure the CLI for the service's persistent use of the credentials..."
-      vagrant up
-      configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
+      echo "This method is deprecated for security reasons."
+      exit 1
+      # vagrant up
+      # configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
     elif [[ "$host_type" == "metal" ]]; then
       if [[ "$stage" == "init" ]]; then
         echo "Will configure the current host to use Open VPN and AWS CLI Credentials"

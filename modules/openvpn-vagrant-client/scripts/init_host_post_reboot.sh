@@ -21,10 +21,8 @@ if test -f "$ip_addresses_file"; then
     output=$(cat "$ip_addresses_file")
     echo "Aquired: $output"
     resourcetier=$(echo ${output} | jq -r ".resourcetier")
-    onsite_private_vpn_mac=$(echo ${output} | jq -r ".${resourcetier}.onsite_private_vpn_mac")
     onsite_private_vpn_ip=$(echo ${output} | jq -r ".${resourcetier}.onsite_private_vpn_ip")
 else
-    onsite_private_vpn_mac='none'
     onsite_private_vpn_ip='none'
 fi
 
