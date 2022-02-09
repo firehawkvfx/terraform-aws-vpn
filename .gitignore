@@ -9,3 +9,4 @@ modules/openvpn-vagrant-client/openvpn_config/*
 s3-backend.tf
 # ip addresses are configuration specific to each deployment
 modules/openvpn-vagrant-client/ip_addresses.json
+.terraform.lock.hcl
