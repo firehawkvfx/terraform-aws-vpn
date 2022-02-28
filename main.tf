@@ -12,13 +12,10 @@ data "aws_vpc" "primary" {
   count = length(var.vpc_id) > 0 ? 1 : 0
   default = false
   id = var.vpc_id
-  # tags    = local.common_tags
 }
-# data "aws_internet_gateway" "gw" {
-#   # default = false
-#   tags = local.common_tags
-# }
+
 data "aws_internet_gateway" "gw" {
+  count = length(var.vpc_id) > 0 ? 1 : 0
   filter {
     name   = "attachment.vpc-id"
     values = [var.vpc_id]
@@ -61,7 +58,7 @@ locals {
   mount_path                 = var.resourcetier
   vpc_id                     = var.vpc_id
   vpc_cidr                   = length(data.aws_vpc.primary) > 0 ? data.aws_vpc.primary[0].cidr_block : ""
-  aws_internet_gateway       = data.aws_internet_gateway.gw.id
+  aws_internet_gateway       = length(data.aws_internet_gateway.gw) ? data.aws_internet_gateway.gw[0].id : ""
   public_subnets             = length(data.aws_subnet_ids.public) > 0 ? sort(data.aws_subnet_ids.public[0].ids) : []
   public_subnet_cidr_blocks  = [for s in data.aws_subnet.public : s.cidr_block]
   private_subnets            = length(data.aws_subnet_ids.private) > 0 ? sort(data.aws_subnet_ids.private[0].ids) : []
