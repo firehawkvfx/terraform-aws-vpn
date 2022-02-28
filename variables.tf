@@ -112,3 +112,9 @@ variable "host2" {
   description = "The user@privatehost string to connect to the vault client to aquire vpn credentials from Vault."
   type        = string
 }
+
+variable "vpc_id" {
+  description = "The ID of the VPC to deploy into. Leave an empty string to use the Default VPC in this region."
+  type        = string
+  default     = null
+}

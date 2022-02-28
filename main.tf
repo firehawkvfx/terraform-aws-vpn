@@ -8,17 +8,24 @@ locals {
   common_tags = var.common_tags
 }
 
-data "aws_vpc" "primary" {
-  default = false
-  tags    = local.common_tags
-}
+# data "aws_vpc" "primary" {
+#   default = false
+#   tags    = local.common_tags
+# }
+# data "aws_internet_gateway" "gw" {
+#   # default = false
+#   tags = local.common_tags
+# }
 data "aws_internet_gateway" "gw" {
-  # default = false
-  tags = local.common_tags
+  filter {
+    name   = "attachment.vpc-id"
+    values = [var.vpc_id]
+  }
 }
 
 data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.primary.id
+  count = length(var.vpc_id) > 0 ? 1 : 0
+  vpc_id = var.vpc_id
   tags   = merge(local.common_tags, { "area" : "public" })
 }
 
@@ -28,7 +35,8 @@ data "aws_subnet" "public" {
 }
 
 data "aws_subnet_ids" "private" {
-  vpc_id = data.aws_vpc.primary.id
+  count = length(var.vpc_id) > 0 ? 1 : 0
+  vpc_id = var.vpc_id
   tags   = merge(local.common_tags, { "area" : "private" })
 }
 
@@ -38,18 +46,18 @@ data "aws_subnet" "private" {
 }
 
 data "aws_route_tables" "public" {
-  vpc_id = data.aws_vpc.primary.id
+  vpc_id = var.vpc_id
   tags   = merge(local.common_tags, { "area" : "public" })
 }
 
 data "aws_route_tables" "private" {
-  vpc_id = data.aws_vpc.primary.id
+  vpc_id = var.vpc_id
   tags   = merge(local.common_tags, { "area" : "private" })
 }
 
 locals {
   mount_path                 = var.resourcetier
-  vpc_id                     = data.aws_vpc.primary.id
+  vpc_id                     = var.vpc_id
   vpc_cidr                   = data.aws_vpc.primary.cidr_block
   aws_internet_gateway       = data.aws_internet_gateway.gw.id
   public_subnets             = sort(data.aws_subnet_ids.public.ids)
