@@ -30,7 +30,7 @@ data "aws_subnet_ids" "public" {
 }
 
 data "aws_subnet" "public" {
-  for_each = data.aws_subnet_ids.public.ids
+  for_each = length(data.aws_subnet_ids.public) > 0 ? data.aws_subnet_ids.public[0].ids : []
   id       = each.value
 }
 
@@ -41,7 +41,7 @@ data "aws_subnet_ids" "private" {
 }
 
 data "aws_subnet" "private" {
-  for_each = data.aws_subnet_ids.private.ids
+  for_each = length(data.aws_subnet_ids.private) > 0 ? data.aws_subnet_ids.private[0].ids : []
   id       = each.value
 }
 
@@ -60,9 +60,9 @@ locals {
   vpc_id                     = var.vpc_id
   vpc_cidr                   = data.aws_vpc.primary.cidr_block
   aws_internet_gateway       = data.aws_internet_gateway.gw.id
-  public_subnets             = sort(data.aws_subnet_ids.public.ids)
+  public_subnets             = length(data.aws_subnet_ids.public) > 0 ? sort(data.aws_subnet_ids.public[0].ids) : []
   public_subnet_cidr_blocks  = [for s in data.aws_subnet.public : s.cidr_block]
-  private_subnets            = sort(data.aws_subnet_ids.private.ids)
+  private_subnets            = length(data.aws_subnet_ids.private) > 0 ? sort(data.aws_subnet_ids.private[0].ids) : []
   private_subnet_cidr_blocks = [for s in data.aws_subnet.private : s.cidr_block]
   vpn_cidr                   = var.vpn_cidr
   onsite_private_subnet_cidr = var.onsite_private_subnet_cidr
