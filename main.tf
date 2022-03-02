@@ -22,25 +22,33 @@ data "aws_internet_gateway" "gw" {
   }
 }
 
-data "aws_subnet_ids" "public" {
-  count = length(var.vpc_id) > 0 ? 1 : 0
-  vpc_id = var.vpc_id
-  tags   = merge(local.common_tags, { "area" : "public" })
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+  tags = {
+    area = "public"
+  }
 }
 
 data "aws_subnet" "public" {
-  for_each = length(data.aws_subnet_ids.public) > 0 ? data.aws_subnet_ids.public[0].ids : []
+  for_each = toset(data.aws_subnets.public.ids)
   id       = each.value
 }
 
-data "aws_subnet_ids" "private" {
-  count = length(var.vpc_id) > 0 ? 1 : 0
-  vpc_id = var.vpc_id
-  tags   = merge(local.common_tags, { "area" : "private" })
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+  tags = {
+    area = "private"
+  }
 }
 
 data "aws_subnet" "private" {
-  for_each = length(data.aws_subnet_ids.private) > 0 ? data.aws_subnet_ids.private[0].ids : []
+  for_each = toset(data.aws_subnets.private.ids)
   id       = each.value
 }
 
@@ -61,9 +69,9 @@ locals {
   vpc_id                     = var.vpc_id
   vpc_cidr                   = length(data.aws_vpc.primary) > 0 ? data.aws_vpc.primary[0].cidr_block : ""
   aws_internet_gateway       = length(data.aws_internet_gateway.gw) > 0 ? data.aws_internet_gateway.gw[0].id : ""
-  public_subnets             = length(data.aws_subnet_ids.public) > 0 ? sort(data.aws_subnet_ids.public[0].ids) : []
+  public_subnets             = length(data.aws_subnets.public) > 0 ? sort(data.aws_subnets.public.ids) : []
   public_subnet_cidr_blocks  = [for s in data.aws_subnet.public : s.cidr_block]
-  private_subnets            = length(data.aws_subnet_ids.private) > 0 ? sort(data.aws_subnet_ids.private[0].ids) : []
+  private_subnets            = length(data.aws_subnets.private) > 0 ? sort(data.aws_subnets.private.ids) : []
   private_subnet_cidr_blocks = [for s in data.aws_subnet.private : s.cidr_block]
   vpn_cidr                   = var.vpn_cidr
   onsite_private_subnet_cidr = var.onsite_private_subnet_cidr
