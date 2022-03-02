@@ -60,7 +60,7 @@ locals {
   mount_path                 = var.resourcetier
   vpc_id                     = var.vpc_id
   vpc_cidr                   = length(data.aws_vpc.primary) > 0 ? data.aws_vpc.primary[0].cidr_block : ""
-  aws_internet_gateway       = length(data.aws_internet_gateway.gw) ? data.aws_internet_gateway.gw[0].id : ""
+  aws_internet_gateway       = length(data.aws_internet_gateway.gw) > 0 ? data.aws_internet_gateway.gw[0].id : ""
   public_subnets             = length(data.aws_subnet_ids.public) > 0 ? sort(data.aws_subnet_ids.public[0].ids) : []
   public_subnet_cidr_blocks  = [for s in data.aws_subnet.public : s.cidr_block]
   private_subnets            = length(data.aws_subnet_ids.private) > 0 ? sort(data.aws_subnet_ids.private[0].ids) : []
