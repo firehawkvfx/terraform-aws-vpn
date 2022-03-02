@@ -68,8 +68,8 @@ locals {
   vpn_cidr                   = var.vpn_cidr
   onsite_private_subnet_cidr = var.onsite_private_subnet_cidr
   onsite_public_ip           = var.onsite_public_ip
-  private_route_table_ids    = length(data.aws_route_tables.private) ? sort(data.aws_route_tables.private[0].ids) : []
-  public_route_table_ids     = length(data.aws_route_tables.public) ? sort(data.aws_route_tables.public[0].ids) : []
+  private_route_table_ids    = length(data.aws_route_tables.private) > 0 ? sort(data.aws_route_tables.private[0].ids) : []
+  public_route_table_ids     = length(data.aws_route_tables.public) > 0 ? sort(data.aws_route_tables.public[0].ids) : []
   public_domain_name         = "none"
   route_zone_id              = "none"
   instance_name              = "${lookup(local.common_tags, "vpcname", "default")}_openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
