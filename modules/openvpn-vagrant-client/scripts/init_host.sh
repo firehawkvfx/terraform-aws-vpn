@@ -81,7 +81,7 @@ sudo grep -qxF 'ConnectTimeout 60' /etc/sudoers.d/98_deployuser || echo 'Connect
 echo "WARNING: PASSWORD AUTHENTICATION IS LEFT ENABLED.  YOU MAY WISH TO USE SSH KEYS ONLY AND DISABLE PASSWORD LOGIN BY CONFIGURING THIS YOURSELF."
 # sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 
-set -x
+# set -x
 export openfirehawkserver_name=${openfirehawkserver_name}
 export onsite_private_vpn_ip=${onsite_private_vpn_ip}
 # ${SCRIPTDIR}/init-gateway.sh --${resourcetier} eth0 # old init-gateway script - init-gateway.sh

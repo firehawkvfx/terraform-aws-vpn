@@ -198,7 +198,7 @@ function install {
   # if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
   if [[ "$configure_aws" == "true" ]]; then
     echo
-    echo "To aquire AWS credentials, run the following from the cloud9 host (or a host with access to Vault):"
+    echo "To aquire AWS credentials, run the following from the provisioner host (or a host with access to Vault):"
     echo "sudo su - ec2-user"
     echo "cd server"
     echo "source ./update_vars.sh"
