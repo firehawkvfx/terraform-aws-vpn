@@ -193,7 +193,7 @@ function install {
     shift
   done
 
-  # target_path="$SCRIPTDIR/ip_addresses.json"
+  target_path="$SCRIPTDIR/ip_addresses.json"
 
   # if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
   if [[ "$configure_aws" == "true" ]]; then
@@ -235,6 +235,9 @@ function install {
       echo
     fi
     
+    echo "Request VPN IP and MAC address" # these values wont change regularly once user has configured their SSM parameters.
+    AWS_ACCESS_KEY_ID="$aws_access_key" AWS_SECRET_ACCESS_KEY="$aws_secret_key" AWS_DEFAULT_REGION="$aws_region" $SCRIPTDIR/scripts/get-vpn-info --target-path $target_path --resourcetier $resourcetier # This method uses AWS creds to read the VM IP and MAC data from SSM parameter store.
+  
     if [[ "$host_type" == "vagrant" ]]; then
       echo "This method is deprecated for security reasons."
       exit 1
