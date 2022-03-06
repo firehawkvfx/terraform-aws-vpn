@@ -135,20 +135,20 @@ function getdata {
     log_info "Aquiring values from Vault"
 
     onsite_private_vpn_ip=$(ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$resourcetier/data/vpn/onsite_private_vpn_ip" "$VAULT_TOKEN" | jq -r '.data.data.value')
-    onsite_private_vpn_mac=$(ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$resourcetier/data/vpn/onsite_private_vpn_mac" "$VAULT_TOKEN" | jq -r '.data.data.value')
+    # onsite_private_vpn_mac=$(ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$resourcetier/data/vpn/onsite_private_vpn_mac" "$VAULT_TOKEN" | jq -r '.data.data.value')
   else
     log_info "Aquiring values from SSM Parameter Store"
 
     onsite_private_vpn_ip=$(ssm_get_parm /firehawk/resourcetier/${resourcetier}/onsite_private_vpn_ip)
-    onsite_private_vpn_mac=$(ssm_get_parm /firehawk/resourcetier/${resourcetier}/onsite_private_vpn_mac)
+    # onsite_private_vpn_mac=$(ssm_get_parm /firehawk/resourcetier/${resourcetier}/onsite_private_vpn_mac)
   fi
 
   echo "onsite_private_vpn_ip: $onsite_private_vpn_ip"
-  echo "onsite_private_vpn_mac: $onsite_private_vpn_mac"
-  echo "{\"resourcetier\": \"$resourcetier\", \"$resourcetier\": {\"onsite_private_vpn_mac\" : \"$onsite_private_vpn_mac\", \"onsite_private_vpn_ip\" : \"$onsite_private_vpn_ip\" }}" | jq . > $target_path
+  # echo "onsite_private_vpn_mac: $onsite_private_vpn_mac"
+  echo "{\"resourcetier\": \"$resourcetier\", \"$resourcetier\": {\"onsite_private_vpn_ip\" : \"$onsite_private_vpn_ip\" }}" | jq . > $target_path
 
   if test -f $target_path; then
-    log_info "IP and MAC address aquired!"
+    log_info "IP address aquired!"
   else
     log_info "Could not aquire data. Aborting.";
     exit 1;
