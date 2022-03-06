@@ -196,7 +196,7 @@ function install {
   # target_path="$SCRIPTDIR/ip_addresses.json"
 
   # if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
-  if [[ "$configure_aws" == "true" ]]
+  if [[ "$configure_aws" == "true" ]]; then
     echo
     echo "To aquire AWS credentials, run the following from the cloud9 host (or a host with access to Vault):"
     echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts/sign-ssh-key --generate-aws-key --aws-backend-role aws-creds-vpn-cert"
