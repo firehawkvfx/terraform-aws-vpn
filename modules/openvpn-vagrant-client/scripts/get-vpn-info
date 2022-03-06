@@ -145,7 +145,7 @@ function getdata {
   echo "{\"resourcetier\": \"$resourcetier\", \"$resourcetier\": {\"onsite_private_vpn_ip\" : \"$onsite_private_vpn_ip\" }}" | jq . > $target_path
 
   if test -f $target_path; then
-    log_info "IP and MAC address aquired!"
+    log_info "IP address aquired!"
   else
     log_info "Could not aquire data. Aborting.";
     exit 1;
