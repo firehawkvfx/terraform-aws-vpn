@@ -262,8 +262,8 @@ function install {
   echo "From the deployer, you can ssh into the deadline DB instance with:"
   echo "ssh ubuntu@deadlinedb.service.consul"
   echo
-  echo "If you are testing a ping to a windows system, you will need to allow firewall rules"
-  echo "to do this.  See:"
+  echo "If you are testing a ping to a windows system from the AWS private network to your onsite"
+  echo "private networks, you will need to allow firewall rules.  To do this.  See:"
   echo
   echo "https://community.spiceworks.com/topic/1984824-ping-replies-on-local-subnet-but-not-to-hosts-on-another-subnet"
   echo
