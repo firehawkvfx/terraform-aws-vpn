@@ -257,13 +257,16 @@ function install {
     vagrant up
   fi
 
-  echo ""
-  echo "If you are using Vagrant further developement is required to secure the VPN against threats that originate in your private network. Using a Raspberry PI is the prefered approach."
-  echo ""
-  echo "A Vagrant VPN is only suited for use in a dev environment on a secure network.  It is recommended you log in and disable inbound SSH on the VM permanently - this will also prevent vagrant from further provisioning."
-  echo "You can destroy the VM with the command:"
-  echo "./destroy dev"
-  echo ""
+  echo "Test the vpn connection by attempting to ping a private host in your"
+  echo "network, your onsite file share (or NAS) and the vpn private IP from your Deadline DB instance."
+  echo "From the deployer, you can ssh into the deadline DB instance with:"
+  echo "ssh ubuntu@deadlinedb.service.consul"
+  echo
+  echo "If you are testing a ping to a windows system, you will need to allow firewall rules"
+  echo "to do this.  See:"
+  echo
+  echo "https://community.spiceworks.com/topic/1984824-ping-replies-on-local-subnet-but-not-to-hosts-on-another-subnet"
+  echo
 }
 
 install "$@"
