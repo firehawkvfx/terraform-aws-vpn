@@ -9,7 +9,7 @@ cd "$SCRIPTDIR"
 
 function print_usage {
   echo
-  echo "Usage: wake [OPTIONS]"
+  echo "Usage: install-vpn-service [OPTIONS]"
   echo
   echo "Starts a VPN gateway (Vagrant VM)."
   echo
@@ -24,7 +24,7 @@ function print_usage {
   echo
   echo "Example: Start the VPN instance."
   echo
-  echo "  wake --resourcetier dev"
+  echo "  install-vpn-service --resourcetier dev"
 }
 
 function log {
