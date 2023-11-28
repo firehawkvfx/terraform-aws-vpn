@@ -93,7 +93,7 @@ data "terraform_remote_state" "openvpn_profile" { # read the arn with data.terra
 
 module "vpn" {
   source                     = "./modules/tf_aws_openvpn"
-  create_vpn                 = true
+  create_vpn                 = false
   security_group_attachments = var.security_group_ids
   example_role_name          = "vpn-server-vault-role" # this authenticates with a dynamically generated secret key
   name                       = local.instance_name
