@@ -19,6 +19,7 @@ variable "sleep" {
 variable "openvpn_server_ami" {
   description = "The AMI ID of your OpenVPN Access Server image built with packer"
   type        = string
+  default     = null
 }
 
 variable "environment" {
