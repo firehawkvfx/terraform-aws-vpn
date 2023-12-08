@@ -1,3 +1,8 @@
+variable "region" {
+  description = "The AWS region to deploy to"
+  type        = string
+}
+
 variable "route_public_domain_name" {
   description = "Defines if a public DNS name is to be used"
   type        = bool

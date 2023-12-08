@@ -16,4 +16,4 @@ dependencies {
     ]
 }
 
-skip=true # Currently thre vpn for the main vpc is disabled in favour of deploying the vpn in the render vpc subnet.
+# skip=true # Currently thre vpn for the main vpc is disabled in favour of deploying the vpn in the render vpc subnet.
