@@ -7,17 +7,17 @@ data "aws_region" "current" {}
 locals {
   common_tags = var.common_tags
   vpn_scripts_bucket_name = "nebula.scripts.${var.resourcetier}.firehawkvfx.com"
-  vpn_scripts_bucket_arn = data.aws_s3_bucket.vpn_scripts.arn
+  # vpn_scripts_bucket_arn = data.aws_s3_bucket.vpn_scripts.arn
   vpn_certs_bucket_name = "nebula.certs.${var.resourcetier}.firehawkvfx.com"
-  vpn_certs_bucket_arn = data.aws_s3_bucket.vpn_certs.arn
+  # vpn_certs_bucket_arn = data.aws_s3_bucket.vpn_certs.arn
 }
 
-data "aws_s3_bucket" "vpn_scripts" {
-  bucket = local.vpn_scripts_bucket_name
-}
-data "aws_s3_bucket" "vpn_certs" {
-  bucket = local.vpn_certs_bucket_name
-}
+# data "aws_s3_bucket" "vpn_scripts" {
+#   bucket = local.vpn_scripts_bucket_name
+# }
+# data "aws_s3_bucket" "vpn_certs" {
+#   bucket = local.vpn_certs_bucket_name
+# }
 
 data "aws_vpc" "primary" {
   count = length(var.vpc_id) > 0 ? 1 : 0
@@ -187,12 +187,12 @@ data "aws_ami" "latest_amazon_linux_2" {
   owners      = ["amazon"]
 }
 
-module "terraform_aws_iam_profile_lighthouse" {
-  source       = "./modules/terraform-aws-iam-profile-lighthouse"
-  resourcetier = var.resourcetier
-  region       = data.aws_region.current.name
-  bucket_arns  = [local.vpn_certs_bucket_arn, local.vpn_scripts_bucket_arn]
-}
+# module "terraform_aws_iam_profile_lighthouse" {
+#   source       = "./modules/terraform-aws-iam-profile-lighthouse"
+#   resourcetier = var.resourcetier
+#   region       = data.aws_region.current.name
+#   bucket_arns  = [local.vpn_certs_bucket_arn, local.vpn_scripts_bucket_arn]
+# }
 
 # Allow access from anywhere!
 module "terraform_aws_sg_bastion" {
@@ -208,7 +208,7 @@ resource "aws_instance" "neb_lighthouse" {
   ami                    = data.aws_ami.latest_amazon_linux_2.id
   subnet_id              = length(local.public_subnets) > 0 ? local.public_subnets[0] : null
   user_data              = data.template_file.user_data_lighthouse.rendered
-  iam_instance_profile   = module.terraform_aws_iam_profile_lighthouse.instance_profile_name
+  iam_instance_profile   = "lighthouse_instance_role_${var.resourcetier}"
   vpc_security_group_ids = [module.terraform_aws_sg_bastion.security_group_id]
   key_name               = "testnebula"
 
