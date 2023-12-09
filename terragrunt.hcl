@@ -6,10 +6,11 @@ locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
 }
 
+# TODO remove this hardcoded region
 inputs = merge(
   local.common_vars.inputs,
   {
-    "region" = "${get_env("AWS_DEFAULT_REGION", "")}"
+    "region" = "ap-southeast-2"
   }
 )
 
