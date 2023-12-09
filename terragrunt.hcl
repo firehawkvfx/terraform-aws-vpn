@@ -7,12 +7,7 @@ locals {
 }
 
 # TODO remove this hardcoded region
-inputs = merge(
-  local.common_vars.inputs,
-  {
-    "region" = "ap-southeast-2"
-  }
-)
+inputs = local.common_vars.inputs
 
 dependencies {
   paths = [
@@ -22,4 +17,4 @@ dependencies {
     ]
 }
 
-# skip=true # Currently thre vpn for the main vpc is disabled in favour of deploying the vpn in the render vpc subnet.
+skip=true # Currently thre vpn for the main vpc is disabled in favour of deploying the vpn in the render vpc subnet.
